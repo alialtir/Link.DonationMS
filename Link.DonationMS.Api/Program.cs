@@ -1,8 +1,11 @@
 
+using Domain.Contracts;
 using Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Persistence;
 using Persistence.Data;
+using Persistence.Repositories;
 
 namespace Link.DonationMS.Api
 {
@@ -25,6 +28,13 @@ namespace Link.DonationMS.Api
 
                 options.UseOpenIddict();
             });
+
+
+            builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+
 
             builder.Services.AddIdentity<User, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<DonationDbContext>()

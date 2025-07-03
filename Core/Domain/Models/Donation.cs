@@ -30,7 +30,7 @@ namespace Domain.Models
 
         public Receipt Receipt { get; set; } 
 
-        public List<EmailNotifications> Notifications { get; set; } 
+        public List<EmailNotification> Notifications { get; set; } 
 
     }
 }

@@ -24,7 +24,7 @@ namespace Persistence.Data
 
         public DbSet<Receipt> Receipts { get; set; }
 
-        public DbSet<EmailNotifications> EmailNotifications { get; set; }
+        public DbSet<EmailNotification> EmailNotifications { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
