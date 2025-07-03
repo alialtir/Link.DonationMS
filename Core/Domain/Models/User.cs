@@ -8,7 +8,7 @@ namespace Domain.Models
 
         public List<Donation> Donations { get; set; } 
 
-        public List<Campaign> Campaigns { get; set; }
+        //public List<Campaign> Campaigns { get; set; }
 
     }
 }

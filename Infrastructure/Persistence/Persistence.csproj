@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Application\Services.Abstractions\Services.Abstractions.csproj" />
     <ProjectReference Include="..\..\Core\Domain\Domain.csproj" />
-    <ProjectReference Include="..\..\Core\Services.Abstractions\Services.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

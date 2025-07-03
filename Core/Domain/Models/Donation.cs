@@ -1,13 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Models
 {
     public class Donation : BaseEntity<int>
     {
-        [Required, Range(1, 100000)]
+        [Required]
+        [Precision(18, 2)]
         public decimal Amount { get; set; }
 
-        public bool isAnonymous { get; set; } = false;
+        public bool IsAnonymous { get; set; } = false;
 
         [Required]
         public DateTime DonationDate { get; set; }

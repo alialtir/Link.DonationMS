@@ -8,7 +8,7 @@ namespace Domain.Models
         
         public Donation Donation { get; set; }
 
-        [Required, MaxLength(500)]
-        public string FilePath { get; set; } 
+ 
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

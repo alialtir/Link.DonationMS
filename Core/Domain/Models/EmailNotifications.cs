@@ -2,16 +2,29 @@
 
 namespace Domain.Models
 {
-    public class EmailNotifications : BaseEntity<int>
+    public class EmailNotification : BaseEntity<int>
     {
         public int DonationId { get; set; }
         public Donation Donation { get; set; }
 
-        [Required, MaxLength(100)]
-        public string Type { get; set; } 
-        public DateTime SentAt { get; set; } = DateTime.UtcNow;
+        [Required]
+        public EmailNotificationType Type { get; set; }
 
+        [EmailAddress, Required]
+        public string RecipientEmail { get; set; }
+
+        [Required, MaxLength(200)]
+        public string Subject { get; set; }
+
+        [Required]
+        public string Body { get; set; }
+
+        public bool IsSent { get; set; } = false;
+
+        public DateTime? SentAt { get; set; }
     }
-    
-    
+
+
+
+
 }

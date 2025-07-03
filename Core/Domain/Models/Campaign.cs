@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -22,7 +23,8 @@ namespace Domain.Models
         [MaxLength(1000)]
         public string? DescriptionEn { get; set; }
 
-        [Required, Range(1,100000)]
+        [Required]
+        [Precision(18, 2)]
 
         public decimal GoalAmount { get; set; }
 
@@ -33,16 +35,20 @@ namespace Domain.Models
 
         public CampaignStatus Status { get; set; } = CampaignStatus.Active;
 
-        [MaxLength(300)]
-        public string? ImageUrl { get; set; }
+        public byte[]? ImageData { get; set; }
+
+        public string? ImageExtension { get; set; }
 
         public int CategoryId { get; set; }
 
         public Category Category { get; set; }
 
-        public Guid? UserId { get; set; }
+        //public Guid? UserId { get; set; }
 
-        public User User { get; set; }
+        //public User User { get; set; }
+
+        public bool GoalReachedEmailSent { get; set; } = false;
+
 
         public List<Donation> Donations { get; set; }
 
