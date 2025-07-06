@@ -1,8 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Domain.Models
+namespace DTOs.CategoryDTOs
 {
-    public class Category : BaseEntity<int>
+    public class CreateCategoryDto
     {
         [Required, MaxLength(100)]
         public string TitleAr { get; set; }
@@ -15,7 +20,5 @@ namespace Domain.Models
 
         [MaxLength(1000)]
         public string? DescriptionEn { get; set; }
-        public List<Campaign> Campaigns { get; set; } = new List<Campaign>();
-    
     }
 }

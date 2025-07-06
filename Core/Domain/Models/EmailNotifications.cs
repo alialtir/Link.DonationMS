@@ -7,6 +7,9 @@ namespace Domain.Models
         public int DonationId { get; set; }
         public Donation Donation { get; set; }
 
+        public Guid? UserId { get; set; }
+        public User User { get; set; }
+
         [Required]
         public EmailNotificationType Type { get; set; }
 
@@ -22,9 +25,7 @@ namespace Domain.Models
         public bool IsSent { get; set; } = false;
 
         public DateTime? SentAt { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
-
-
-
-
 }

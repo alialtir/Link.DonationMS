@@ -1,4 +1,4 @@
-﻿using Domain.Models;
+using Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,4 +21,4 @@ namespace Domain.Contracts
         bool IsPagingEnabled { get; }
     }
 
-}
+} 

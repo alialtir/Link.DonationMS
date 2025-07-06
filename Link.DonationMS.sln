@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Application\Ser
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.Abstractions", "Application\Services.Abstractions\Services.Abstractions.csproj", "{409477F4-9AF8-41DD-B3AF-7114C8F03197}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dtos", "Application\Dtos\Dtos.csproj", "{87EFAC29-8651-467C-BAE4-71339636DE5E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTOs", "Application\Dtos\DTOs.csproj", "{87EFAC29-8651-467C-BAE4-71339636DE5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -32,7 +32,6 @@ namespace Persistence.Data
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AssemblyRef).Assembly);
             base.OnModelCreating(modelBuilder);
-            // Configure your entity mappings here
         }
 
      

@@ -13,10 +13,9 @@ namespace Domain.Contracts
         IGenericRepository<Donation, int> Donations { get; }
         IGenericRepository<EmailNotification, int> EmailNotifications { get; }
         IGenericRepository<Category, int> Categories { get; }
-        
+        IGenericRepository<Receipt, int> Receipts { get; }
+        IUserRepository Users { get; }
 
         Task<int> CompleteAsync();
     }
-
-
 }

@@ -8,7 +8,6 @@ namespace Domain.Models
         
         public Donation Donation { get; set; }
 
- 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

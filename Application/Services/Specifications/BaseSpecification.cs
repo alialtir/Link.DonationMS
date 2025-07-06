@@ -39,6 +39,4 @@ namespace Services.Specifications
             Skip = pageSize * (pageIndex - 1);
         }
     }
-
-
 }

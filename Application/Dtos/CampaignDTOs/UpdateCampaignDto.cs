@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
-namespace Domain.Models
+namespace DTOs.CampaignDTOs
 {
-    public class Category : BaseEntity<int>
+    public class UpdateCampaignDto
     {
         [Required, MaxLength(100)]
         public string TitleAr { get; set; }
@@ -15,7 +16,14 @@ namespace Domain.Models
 
         [MaxLength(1000)]
         public string? DescriptionEn { get; set; }
-        public List<Campaign> Campaigns { get; set; } = new List<Campaign>();
-    
+
+        [Required]
+        public decimal GoalAmount { get; set; }
+
+        [Required]
+        public DateTime EndDate { get; set; }
+
+        [Required]
+        public int CategoryId { get; set; }
     }
 }
