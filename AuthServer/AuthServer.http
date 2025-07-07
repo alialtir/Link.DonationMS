@@ -1,0 +1,21 @@
+@AuthServer_HostAddress = https://localhost:7071
+
+### Login
+POST {{AuthServer_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "userName": "admin@linkdonation.com",
+  "password": "Admin123!"
+}
+
+### Get Profile (requires Authorization header)
+GET {{AuthServer_HostAddress}}/api/auth/profile
+Authorization: Bearer {{access_token}}
+
+### Validate Token
+GET {{AuthServer_HostAddress}}/api/auth/validate
+Authorization: Bearer {{access_token}}
+
+### Swagger UI
+GET {{AuthServer_HostAddress}}/swagger

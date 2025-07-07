@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.Abstractions", "Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTOs", "Application\Dtos\DTOs.csproj", "{87EFAC29-8651-467C-BAE4-71339636DE5E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Identity", "Identity", "{EC309C33-0F17-42E3-9F16-CDDB0923DE4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthServer", "AuthServer\AuthServer.csproj", "{0656D404-4013-4854-8CA4-5EC44C72E64E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,10 @@ Global
 		{87EFAC29-8651-467C-BAE4-71339636DE5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87EFAC29-8651-467C-BAE4-71339636DE5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87EFAC29-8651-467C-BAE4-71339636DE5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0656D404-4013-4854-8CA4-5EC44C72E64E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0656D404-4013-4854-8CA4-5EC44C72E64E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0656D404-4013-4854-8CA4-5EC44C72E64E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0656D404-4013-4854-8CA4-5EC44C72E64E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +75,7 @@ Global
 		{1F49515D-CC7F-4F10-AE6A-574E6E801801} = {4ABED41A-C7A0-42A1-BBF5-C8BAD3840602}
 		{409477F4-9AF8-41DD-B3AF-7114C8F03197} = {4ABED41A-C7A0-42A1-BBF5-C8BAD3840602}
 		{87EFAC29-8651-467C-BAE4-71339636DE5E} = {4ABED41A-C7A0-42A1-BBF5-C8BAD3840602}
+		{0656D404-4013-4854-8CA4-5EC44C72E64E} = {EC309C33-0F17-42E3-9F16-CDDB0923DE4A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8F988103-5683-44DE-990A-032EE65DA47D}

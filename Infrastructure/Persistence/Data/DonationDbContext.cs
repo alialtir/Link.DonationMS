@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenIddict.EntityFrameworkCore.Models;
+using OpenIddict.EntityFrameworkCore;
 
 namespace Persistence.Data
 {
@@ -29,9 +31,10 @@ namespace Persistence.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AssemblyRef).Assembly);
             base.OnModelCreating(modelBuilder);
+            
+            modelBuilder.UseOpenIddict<Guid>();
         }
 
      
