@@ -48,51 +48,51 @@ namespace AuthServer
                 options.User.RequireUniqueEmail = true;
             });
 
-            builder.Services.AddOpenIddict()
-                .AddCore(options =>
-                {
-                    options.UseEntityFrameworkCore()
-                           .UseDbContext<DonationDbContext>();
-                })
-                .AddServer(options =>
-                {
-                    options
-                        .SetTokenEndpointUris("/connect/token");
+            //builder.Services.AddOpenIddict()
+            //    .AddCore(options =>
+            //    {
+            //        options.UseEntityFrameworkCore()
+            //               .UseDbContext<DonationDbContext>();
+            //    })
+            //    .AddServer(options =>
+            //    {
+            //        options
+            //            .SetTokenEndpointUris("/connect/token");
 
-                    options
-                        .AllowPasswordFlow();
+            //        options
+            //            .AllowPasswordFlow();
 
-                    options
-                        .AddDevelopmentEncryptionCertificate()
-                        .AddDevelopmentSigningCertificate();
+            //        options
+            //            .AddDevelopmentEncryptionCertificate()
+            //            .AddDevelopmentSigningCertificate();
 
-                    options
-                        .UseAspNetCore()
-                        .EnableTokenEndpointPassthrough();
-                });
+            //        options
+            //            .UseAspNetCore()
+            //            .EnableTokenEndpointPassthrough();
+            //    });
 
-            var jwtKey = builder.Configuration["Jwt:Key"];
-            var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-            var jwtAudience = builder.Configuration["Jwt:Audience"];
+            //var jwtKey = builder.Configuration["Jwt:Key"];
+            //var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+            //var jwtAudience = builder.Configuration["Jwt:Audience"];
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtIssuer,
-                    ValidAudience = jwtAudience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey ?? "your-super-secret-key-with-at-least-256-bits"))
-                };
-            });
+            //builder.Services.AddAuthentication(options =>
+            //{
+            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //})
+            //.AddJwtBearer(options =>
+            //{
+            //    options.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ValidateIssuer = true,
+            //        ValidateAudience = true,
+            //        ValidateLifetime = true,
+            //        ValidateIssuerSigningKey = true,
+            //        ValidIssuer = jwtIssuer,
+            //        ValidAudience = jwtAudience,
+            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey ?? "your-super-secret-key-with-at-least-256-bits"))
+            //    };
+            //});
 
             builder.Services.AddAuthorization();
 

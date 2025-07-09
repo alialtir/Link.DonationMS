@@ -6,7 +6,7 @@ namespace Application.Services.Abstractions
     public interface IDonationService
     {
         Task<DonationResultDto> GetByIdAsync(int id);
-        Task<IEnumerable<DonationResultDto>> GetAllAsync();
+        Task<IEnumerable<DonationResultDto>> GetAllAsync(int pageNumber = 1);
         Task<IEnumerable<DonationResultDto>> GetDonationsByUserAsync(Guid userId);
         Task<IEnumerable<DonationResultDto>> GetDonationsByCampaignAsync(int campaignId);
         Task<DonationResultDto> CreateAsync(CreateDonationDto createDonationDto);

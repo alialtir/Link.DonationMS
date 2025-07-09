@@ -1,5 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Application.Dtos.UserDTOs;
+using Application.Services.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
 namespace Link.DonationMS.Api.Controllers
@@ -8,45 +10,32 @@ namespace Link.DonationMS.Api.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        [HttpGet("validate")]
-        [Authorize]
-        public IActionResult ValidateToken()
+        private readonly IServiceManager _serviceManager;
+        public AuthController(IServiceManager serviceManager)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userName = User.FindFirst(ClaimTypes.Name)?.Value;
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var displayName = User.FindFirst("display_name")?.Value;
-            var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
-
-            return Ok(new
-            {
-                user_id = userId,
-                user_name = userName,
-                email = email,
-                display_name = displayName,
-                roles = roles,
-                is_valid = true
-            });
+            _serviceManager = serviceManager;
         }
 
-        [HttpGet("me")]
-        [Authorize]
-        public IActionResult GetCurrentUser()
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userName = User.FindFirst(ClaimTypes.Name)?.Value;
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var displayName = User.FindFirst("display_name")?.Value;
-            var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+            var result = await _serviceManager.AuthenticationService.LoginAsync(dto);
+            if (!result.Succeeded)
+                return Unauthorized(result);
+            return Ok(result);
+        }
 
-            return Ok(new
-            {
-                id = userId,
-                userName = userName,
-                email = email,
-                displayName = displayName,
-                roles = roles
-            });
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<IActionResult> Profile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+            var profile = await _serviceManager.AuthenticationService.GetUserProfileAsync(userId);
+            if (profile == null)
+                return NotFound();
+            return Ok(profile);
         }
     }
 } 

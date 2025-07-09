@@ -66,6 +66,11 @@ namespace Services
             if (user == null)
                 throw new InvalidOperationException("User not found");
 
+            if (user.Email == "admin@linkdonation.com")
+            {
+                throw new InvalidOperationException("The original system administrator cannot be modified.");
+            }
+
             _mapper.Map(userDto, user);
             var result = await _userManager.UpdateAsync(user);
 
@@ -83,6 +88,11 @@ namespace Services
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
                 return false;
+
+            if (user.Email == "admin@linkdonation.com")
+            {
+                throw new InvalidOperationException("The original system administrator cannot be deleted.");
+            }
 
             var result = await _userManager.DeleteAsync(user);
             return result.Succeeded;

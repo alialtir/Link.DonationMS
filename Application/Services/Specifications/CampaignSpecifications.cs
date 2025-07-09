@@ -61,5 +61,14 @@ namespace Services.Specifications
                 ApplyPagination(1, count);
             }
         }
+
+        public class CampaignsWithPaginationSpecification : BaseSpecification<Campaign, int>
+        {
+            public CampaignsWithPaginationSpecification(int pageNumber, int pageSize) : base()
+            {
+                AddInclude(c => c.Category);
+                ApplyPagination(pageNumber, pageSize);
+            }
+        }
     }
 } 

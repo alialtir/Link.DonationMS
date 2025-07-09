@@ -1,0 +1,45 @@
+@model DTOs.CategoryDTOs.CategoryDto
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Edit Category</h2>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<form asp-action="Edit" method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display: none;"></div>
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="TitleAr" class="form-label">Title (Arabic) *</label>
+        <input asp-for="TitleAr" class="form-control arabic-text" placeholder="أدخل العنوان باللغة العربية (حروف عربية فقط)" dir="rtl" />
+        <span asp-validation-for="TitleAr" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="TitleEn" class="form-label">Title (English) *</label>
+        <input asp-for="TitleEn" class="form-control" placeholder="Enter title in English" />
+        <span asp-validation-for="TitleEn" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="DescriptionAr" class="form-label">Description (Arabic)</label>
+        <textarea asp-for="DescriptionAr" class="form-control arabic-text" rows="3" placeholder="أدخل الوصف باللغة العربية (حروف عربية فقط - اختياري)" dir="rtl"></textarea>
+        <span asp-validation-for="DescriptionAr" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="DescriptionEn" class="form-label">Description (English)</label>
+        <textarea asp-for="DescriptionEn" class="form-control" rows="3" placeholder="Enter description in English (optional)"></textarea>
+        <span asp-validation-for="DescriptionEn" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <button type="submit" class="btn btn-success">
+            <i class="fas fa-save"></i> Save Changes
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Cancel
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+} 

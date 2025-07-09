@@ -1,29 +1,30 @@
 using Application.Services.Abstractions;
+using AutoMapper;
+using Domain.Contracts;
+using Microsoft.AspNetCore.Identity;
+using Domain.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace Services
 {
     public class ServiceManager : IServiceManager
     {
         public ServiceManager(
-            ICampaignService campaignService,
-            IDonationService donationService,
-            ICategoryService categoryService,
-            IUserService userService,
-            IDashboardService dashboardService,
-            IEmailNotificationService emailNotificationService,
-            IReceiptService receiptService,
-            IPaymentService paymentService,
-            IAuthenticationService authenticationService)
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            UserManager<User> userManager,
+            IConfiguration configuration
+        )
         {
-            CampaignService = campaignService;
-            DonationService = donationService;
-            CategoryService = categoryService;
-            UserService = userService;
-            DashboardService = dashboardService;
-            EmailNotificationService = emailNotificationService;
-            ReceiptService = receiptService;
-            PaymentService = paymentService;
-            AuthenticationService = authenticationService;
+            CampaignService = new CampaignService(unitOfWork, mapper);
+            DonationService = new DonationService(unitOfWork, mapper);
+            CategoryService = new CategoryService(unitOfWork, mapper);
+            UserService = new UserService(unitOfWork, mapper, userManager);
+            DashboardService = new DashboardService();
+            EmailNotificationService = new EmailNotificationService();
+            ReceiptService = new ReceiptService();
+            PaymentService = new PaymentService();
+            AuthenticationService = new AuthenticationService(userManager, configuration);
         }
 
         public ICampaignService CampaignService { get; }

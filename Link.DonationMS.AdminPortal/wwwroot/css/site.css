@@ -1,0 +1,169 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+/* Validation Styles */
+.field-validation-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+  font-weight: 500;
+}
+
+/* Arabic text support */
+[dir="rtl"],
+.arabic-text {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Segoe UI', 'Arial Unicode MS', 'Microsoft YaHei', sans-serif;
+}
+
+/* Enhanced validation for Arabic fields */
+.field-validation-error[data-valmsg-for*="Ar"] {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+}
+
+/* Arabic input styling */
+.arabic-text.form-control {
+  font-family: 'Segoe UI', 'Arial Unicode MS', 'Microsoft YaHei', sans-serif;
+  font-size: 1rem;
+}
+
+/* Table cell alignment for mixed content */
+.table td.arabic-text {
+  text-align: right;
+  vertical-align: middle;
+}
+
+.field-validation-valid {
+  display: none;
+}
+
+.input-validation-error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.input-validation-error:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.validation-summary-errors {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.validation-summary-errors ul {
+  margin-bottom: 0;
+  padding-left: 1.5rem;
+}
+
+/* Form Improvements */
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.form-control:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Button Improvements */
+.btn-group .btn {
+  margin-right: 0.25rem;
+}
+
+.btn-group .btn:last-child {
+  margin-right: 0;
+}
+
+/* Table Improvements for Campaigns */
+.table th {
+  white-space: nowrap;
+  vertical-align: middle;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.table td {
+  vertical-align: middle;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+.table td small {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+/* Campaign table specific styling */
+.table td.arabic-text {
+  text-align: right;
+  direction: rtl;
+}
+
+.table th:nth-child(1) { /* Image */
+  width: 80px;
+}
+
+.table th:nth-child(2), /* Title Ar */
+.table th:nth-child(3) { /* Title En */
+  width: 150px;
+}
+
+.table th:nth-child(4), /* Description Ar */
+.table th:nth-child(5) { /* Description En */
+  width: 200px;
+}
+
+.table th:nth-child(6) { /* Category */
+  width: 120px;
+}
+
+.table th:nth-child(7), /* Goal Amount */
+.table th:nth-child(8) { /* Current Amount */
+  width: 120px;
+}
+
+.table th:nth-child(9) { /* End Date */
+  width: 100px;
+}
+
+.table th:nth-child(10) { /* Status */
+  width: 100px;
+}
+
+.table th:nth-child(11) { /* Actions */
+  width: 150px;
+}

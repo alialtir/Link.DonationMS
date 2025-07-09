@@ -72,5 +72,15 @@ namespace Services.Specifications
                 AddOrderByDescending(d => d.DonationDate);
             }
         }
+
+        public class DonationsWithPaginationSpecification : BaseSpecification<Donation, int>
+        {
+            public DonationsWithPaginationSpecification(int pageNumber, int pageSize) : base()
+            {
+                AddInclude(d => d.Campaign);
+                AddInclude(d => d.User);
+                ApplyPagination(pageNumber, pageSize);
+            }
+        }
     }
 } 

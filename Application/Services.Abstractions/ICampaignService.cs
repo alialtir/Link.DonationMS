@@ -5,7 +5,7 @@ namespace Application.Services.Abstractions
     public interface ICampaignService
     {
         Task<CampaignResultDto> GetByIdAsync(int id);
-        Task<IEnumerable<CampaignResultDto>> GetAllAsync();
+        Task<IEnumerable<CampaignResultDto>> GetAllAsync(int pageNumber = 1);
         Task<IEnumerable<CampaignResultDto>> GetActiveCampaignsAsync();
         Task<IEnumerable<CampaignResultDto>> GetCompletedCampaignsAsync();
         Task<IEnumerable<CampaignResultDto>> GetCampaignsByCategoryAsync(int categoryId);

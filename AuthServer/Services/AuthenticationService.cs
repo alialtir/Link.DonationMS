@@ -81,8 +81,8 @@ namespace AuthServer.Services
                 UserId = user.Id.ToString(),
                 UserName = user.UserName,
                 Email = user.Email,
-                FirstName = user.DisplayName,
-                LastName = "",
+                //FirstName = user.DisplayName,
+                //LastName = "",
                 Roles = roles.ToList()
             };
         }

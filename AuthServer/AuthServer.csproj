@@ -24,4 +24,8 @@
     <ProjectReference Include="..\Application\Dtos\DTOs.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,27 @@
+@model IEnumerable<DTOs.UserDTOs.UserDto>
+@if (!Model.Any())
+{
+    <div class="alert alert-warning text-center" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; font-size: 1.2em;">
+        No donors
+    </div>
+}
+else
+{
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.DisplayName</td>
+                <td>@user.Email</td>
+            </tr>
+        }
+    </tbody>
+</table>
+} 

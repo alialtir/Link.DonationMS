@@ -1,0 +1,33 @@
+@model IEnumerable<DTOs.DonationDTOs.DonationResultDto>
+@if (!Model.Any())
+{
+    <div class="alert alert-warning text-center" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; font-size: 1.2em;">
+        No donations
+    </div>
+}
+else
+{
+<table class="table">
+    <thead>
+        <tr>
+            <th>Donor</th>
+            <th>Campaign</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var donation in Model)
+        {
+            <tr>
+                <td>@donation.DonorName</td>
+                <td>@donation.CampaignTitle</td>
+                <td>@donation.Amount</td>
+                <td>@donation.DonationDate.ToString("yyyy-MM-dd")</td>
+                <td>@donation.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+} 
