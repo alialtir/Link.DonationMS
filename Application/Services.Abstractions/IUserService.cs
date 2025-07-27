@@ -17,5 +17,6 @@ namespace Application.Services.Abstractions
         Task<bool> AddToRoleAsync(Guid userId, string role);
         Task<bool> RemoveFromRoleAsync(Guid userId, string role);
         Task<IEnumerable<UserDto>> GetUsersInRoleAsync(string role);
+        Task<bool> ResetPasswordByEmailAsync(string email, string newPassword);
     }
 } 

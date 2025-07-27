@@ -1,11 +1,13 @@
 using Application.Services.Abstractions;
 using DTOs.CampaignDTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Link.DonationMS.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class CampaignsController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -14,11 +16,28 @@ namespace Link.DonationMS.Api.Controllers
             _serviceManager = serviceManager;
         }
 
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int page = 1)
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 6)
         {
-            var result = await _serviceManager.CampaignService.GetAllAsync(page);
-            return Ok(result);
+            var items = await _serviceManager.CampaignService.GetAllAsync(page, pageSize);
+            var totalCount = await _serviceManager.CampaignService.GetCountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            return Ok(new {
+                items,
+                totalCount,
+                totalPages,
+                page,
+                pageSize
+            });
+        }
+
+    
+        [HttpGet("count")]
+        public async Task<IActionResult> GetCount()
+        {
+            var count = await _serviceManager.CampaignService.GetCountAsync();
+            return Ok(count);
         }
 
         [HttpGet("{id}")]
@@ -51,5 +70,22 @@ namespace Link.DonationMS.Api.Controllers
             if (!result) return NotFound();
             return Ok();
         }
+
+        [AllowAnonymous]
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActive([FromQuery] string? title, [FromQuery] int? categoryId, [FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+        {
+            var result = await _serviceManager.CampaignService.GetActiveCampaignsFilteredAsync(title, categoryId, page, pageSize);
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("completed")]
+        public async Task<IActionResult> GetCompleted()
+        {
+            var result = await _serviceManager.CampaignService.GetCompletedCampaignsAsync();
+            return Ok(result);
+        }
+
     }
 } 

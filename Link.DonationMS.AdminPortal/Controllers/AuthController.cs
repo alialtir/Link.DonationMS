@@ -22,34 +22,65 @@ namespace Link.DonationMS.AdminPortal.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login()
+        public async Task<IActionResult> Login()
         {
             if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                if (!User.IsInRole("Admin"))
+                {
+                    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    Response.Cookies.Delete("AccessToken");
+                    ModelState.AddModelError("", "Access denied. Only Administrators can access Admin Portal.");
+                    return View();
+                }
                 return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginDto model)
         {
-            var result = await _apiService.LoginAsync(model);
-            if (result == null || !result.Succeeded)
+            try
             {
-                ModelState.AddModelError("", result?.Error ?? "Login failed");
+                var result = await _apiService.LoginAsync(model);
+                if (result == null || !result.Succeeded)
+                {
+                    ModelState.AddModelError("", result?.Error ?? "Login failed");
+                    return View(model);
+                }
+                if (result.Roles == null || !result.Roles.Contains("Admin"))
+                {
+                    ModelState.AddModelError("", "غير مسموح لك بالدخول");
+                    return View(model);
+                }
+                if (result.RequiresPasswordReset)
+                {
+                    return RedirectToAction("ResetPassword", new { email = model.UserName });
+                }
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, result.UserId ?? ""),
+                    new Claim(ClaimTypes.Name, result.UserName ?? "")
+                };
+                if (result.Roles != null)
+                    claims.AddRange(result.Roles.Select(r => new Claim(ClaimTypes.Role, r)));
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                Response.Cookies.Append("AccessToken", result.AccessToken ?? "");
+                return RedirectToAction("Index", "Home");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
                 return View(model);
             }
-            var claims = new List<Claim>
+            catch (Exception ex)
             {
-                new Claim(ClaimTypes.NameIdentifier, result.UserId ?? ""),
-                new Claim(ClaimTypes.Name, result.UserName ?? "")
-            };
-            if (result.Roles != null)
-                claims.AddRange(result.Roles.Select(r => new Claim(ClaimTypes.Role, r)));
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-            Response.Cookies.Append("AccessToken", result.AccessToken ?? "");
-            return RedirectToAction("Index", "Home");
+                ModelState.AddModelError("", $"An unexpected error occurred: {ex.Message}");
+                return View(model);
+            }
         }
 
         [HttpPost]
@@ -58,6 +89,32 @@ namespace Link.DonationMS.AdminPortal.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             Response.Cookies.Delete("AccessToken");
             return RedirectToAction("Login", "Auth");
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string email)
+        {
+            ViewBag.Email = email;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(string email, string newPassword, string confirmPassword)
+        {
+            if (newPassword != confirmPassword)
+            {
+                TempData["Error"] = "Passwords do not match.";
+                ViewBag.Email = email;
+                return View();
+            }
+            var result = await _apiService.ResetPasswordByEmailAsync(email, newPassword);
+            if (result)
+            {
+                return RedirectToAction("Login");
+            }
+            TempData["Error"] = "An error occurred while changing the password.";
+            ViewBag.Email = email;
+            return View();
         }
     }
 } 

@@ -1,21 +1,34 @@
 using DTOs.CategoryDTOs;
 using Microsoft.AspNetCore.Mvc;
 using Link.DonationMS.AdminPortal.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 
 namespace Link.DonationMS.AdminPortal.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class CategoriesController : Controller
     {
         private readonly ApiService _apiService;
+        private readonly IConfiguration _configuration;
 
-        public CategoriesController(ApiService apiService)
+        public CategoriesController(ApiService apiService, IConfiguration configuration)
         {
             _apiService = apiService;
+            _configuration = configuration;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var categories = await _apiService.GetCategoriesAsync();
+            var categories = await _apiService.GetCategoriesAsync(page);
+            var totalCount = await _apiService.GetCategoriesCountAsync();
+            var pageSize = _configuration.GetValue<int>("PageSize", 5);
+            
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            ViewBag.HasPreviousPage = page > 1;
+            ViewBag.HasNextPage = page < ViewBag.TotalPages && categories.Any();
+            
             return View(categories);
         }
 
@@ -47,23 +60,24 @@ namespace Link.DonationMS.AdminPortal.Controllers
             {
                 return NotFound();
             }
-            return View(category);
+            
+            var updateDto = new UpdateCategoryDto
+            {
+                TitleAr = category.TitleAr,
+                TitleEn = category.TitleEn,
+                DescriptionAr = category.DescriptionAr,
+                DescriptionEn = category.DescriptionEn
+            };
+            
+            return View(updateDto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, CategoryDto dto)
+        public async Task<IActionResult> Edit(int id, UpdateCategoryDto dto)
         {
             if (ModelState.IsValid)
             {
-                var updateDto = new UpdateCategoryDto
-                {
-                    TitleAr = dto.TitleAr,
-                    TitleEn = dto.TitleEn,
-                    DescriptionAr = dto.DescriptionAr,
-                    DescriptionEn = dto.DescriptionEn
-                };
-
-                var result = await _apiService.UpdateCategoryAsync(id, updateDto);
+                var result = await _apiService.UpdateCategoryAsync(id, dto);
                 if (result != null)
                 {
                     TempData["Success"] = "Category updated successfully.";

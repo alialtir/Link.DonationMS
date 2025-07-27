@@ -1,8 +1,10 @@
 using Link.DonationMS.AdminPortal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Link.DonationMS.AdminPortal.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class DonationsController : Controller
     {
         private readonly ApiService _apiService;

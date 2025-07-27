@@ -3,26 +3,49 @@
 @if (Model.Email == "admin@linkdonation.com")
 {
     <div class="alert alert-warning">
-        <h4>System Administrator</h4>
-        <p>The original system administrator cannot be modified for security reasons.</p>
-        <a asp-action="Admins" class="btn btn-secondary">Back to Admins</a>
+        <h4>@SharedResource.GetString("SystemAdministrator")</h4>
+        <p>@SharedResource.GetString("SystemAdminCannotModify")</p>
+        <a asp-action="Admins" class="btn btn-secondary">@SharedResource.GetString("BackToList")</a>
     </div>
 }
 else
 {
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>@SharedResource.GetString("EditAdmin")</h2>
+        <div class="d-flex align-items-center">
+            <a asp-action="Admins" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> @SharedResource.GetString("BackToList")
+            </a>
+        </div>
+    </div>
+
     <form asp-action="EditAdmin" method="post">
+        <input type="hidden" asp-for="Id" />
         <div class="mb-3">
-            <label>Name</label>
+            <label asp-for="DisplayName" class="form-label">@SharedResource.GetString("Name")</label>
             <input asp-for="DisplayName" class="form-control" />
             <span asp-validation-for="DisplayName" class="text-danger"></span>
         </div>
         <div class="mb-3">
-            <label>Email</label>
+            <label asp-for="Email" class="form-label">@SharedResource.GetString("Email")</label>
             <input asp-for="Email" class="form-control" />
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
-        <button type="submit" class="btn btn-success">Save</button>
-        <a asp-action="Admins" class="btn btn-secondary">Cancel</a>
+        
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+            </div>
+        }
+        
+        <button type="submit" class="btn btn-success">@SharedResource.GetString("Save")</button>
+        <a asp-action="Admins" class="btn btn-secondary">@SharedResource.GetString("Cancel")</a>
     </form>
 }
 

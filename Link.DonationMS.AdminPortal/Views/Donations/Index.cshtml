@@ -2,7 +2,7 @@
 @if (!Model.Any())
 {
     <div class="alert alert-warning text-center" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; font-size: 1.2em;">
-        No donations
+        @SharedResource.GetString("NoDonations")
     </div>
 }
 else
@@ -10,11 +10,11 @@ else
 <table class="table">
     <thead>
         <tr>
-            <th>Donor</th>
-            <th>Campaign</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Status</th>
+            <th>@SharedResource.GetString("Donor")</th>
+            <th>@SharedResource.GetString("Campaign")</th>
+            <th>@SharedResource.GetString("Amount")</th>
+            <th>@SharedResource.GetString("Date")</th>
+            <th>@SharedResource.GetString("Status")</th>
         </tr>
     </thead>
     <tbody>

@@ -9,6 +9,7 @@ public class AuthenticationResult
     public string? Email { get; set; }
     public List<string>? Roles { get; set; }
     public string? Error { get; set; }
+    public bool RequiresPasswordReset { get; set; }
 }
 
 public class UserProfileResult

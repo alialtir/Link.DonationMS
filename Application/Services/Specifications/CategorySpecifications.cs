@@ -34,5 +34,22 @@ namespace Services.Specifications
                 AddOrderBy(c => c.TitleAr);
             }
         }
+
+        public class CategoriesWithPaginationSpecification : BaseSpecification<Category, int>
+        {
+            public CategoriesWithPaginationSpecification(int pageNumber, int pageSize) : base()
+            {
+                AddOrderBy(c => c.TitleAr);
+                ApplyPagination(pageNumber, pageSize);
+            }
+        }
+
+        public class AllCategoriesSpecification : BaseSpecification<Category, int>
+        {
+            public AllCategoriesSpecification() : base()
+            {
+                AddOrderBy(c => c.TitleAr);
+            }
+        }
     }
 } 

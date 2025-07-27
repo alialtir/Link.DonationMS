@@ -18,7 +18,7 @@ namespace Domain.Models
         public DonationStatus Status { get; set; } = DonationStatus.Pending;
 
         [MaxLength(300)]
-        public string? SessionId { get; set; }
+        public string? ClientSecret { get; set; }
 
         [MaxLength(300)]
         public string? PaymentIntentId { get; set; }

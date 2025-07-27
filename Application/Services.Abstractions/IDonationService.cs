@@ -14,6 +14,6 @@ namespace Application.Services.Abstractions
         Task<bool> DeleteAsync(int id);
         Task<decimal> GetTotalDonationsByCampaignAsync(int campaignId);
         Task<bool> ProcessPaymentAsync(int donationId, string paymentIntentId);
-        Task<bool> GenerateReceiptAsync(int donationId);
+     
     }
 } 

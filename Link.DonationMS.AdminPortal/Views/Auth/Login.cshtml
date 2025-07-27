@@ -1,9 +1,9 @@
 @model Application.Dtos.UserDTOs.LoginDto
 @{
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = SharedResource.GetString("Login");
 }
-<h2>Login</h2>
+<h2>@SharedResource.GetString("Login")</h2>
 <form asp-action="Login" method="post">
     <div class="form-group">
         <label asp-for="UserName"></label>
@@ -11,7 +11,7 @@
         <span asp-validation-for="UserName" class="text-danger"></span>
         @if (ViewData.ModelState[""] != null && ViewData.ModelState[""].Errors.Count > 0)
         {
-            <span class="text-danger">Invalid username or password</span>
+            <span class="text-danger">@SharedResource.GetString("InvalidUsernamePassword")</span>
         }
     </div>
     <div class="form-group mt-2">
@@ -20,10 +20,10 @@
         <span asp-validation-for="Password" class="text-danger"></span>
         @if (ViewData.ModelState[""] != null && ViewData.ModelState[""].Errors.Count > 0)
         {
-            <span class="text-danger">Invalid username or password</span>
+            <span class="text-danger">@SharedResource.GetString("InvalidUsernamePassword")</span>
         }
     </div>
-    <button type="submit" class="btn btn-primary mt-3 w-100">Login</button>
+    <button type="submit" class="btn btn-primary mt-3 w-100">@SharedResource.GetString("Login")</button>
 </form>
 
 @section Scripts {

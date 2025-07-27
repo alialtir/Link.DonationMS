@@ -28,24 +28,39 @@ namespace Services
         public async Task<UserDto> GetByIdAsync(Guid id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
-            return _mapper.Map<UserDto>(user);
+            var dto = _mapper.Map<UserDto>(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            dto.Role = roles.FirstOrDefault() ?? string.Empty;
+            return dto;
         }
 
         public async Task<UserDto> GetByEmailAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            return _mapper.Map<UserDto>(user);
+            var dto = _mapper.Map<UserDto>(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            dto.Role = roles.FirstOrDefault() ?? string.Empty;
+            return dto;
         }
 
         public async Task<IEnumerable<UserDto>> GetAllAsync()
         {
             var users = await _userManager.Users.ToListAsync();
-            return users.Select(u => _mapper.Map<UserDto>(u));
+            var result = new List<UserDto>();
+            foreach (var user in users)
+            {
+                var dto = _mapper.Map<UserDto>(user);
+                var roles = await _userManager.GetRolesAsync(user);
+                dto.Role = roles.FirstOrDefault() ?? string.Empty;
+                result.Add(dto);
+            }
+            return result;
         }
 
         public async Task<UserDto> RegisterAsync(RegisterUserDto registerUserDto)
         {
             var user = _mapper.Map<User>(registerUserDto);
+            user.RequiresPasswordReset = false; 
             var result = await _userManager.CreateAsync(user, registerUserDto.Password);
 
             if (!result.Succeeded)
@@ -54,10 +69,12 @@ namespace Services
                 throw new InvalidOperationException($"Failed to create user: {errors}");
             }
 
-           
+            // تعيين دور Donor افتراضياً للمستخدمين الجدد
             await _userManager.AddToRoleAsync(user, "Donor");
 
-            return _mapper.Map<UserDto>(user);
+            var dto = _mapper.Map<UserDto>(user);
+            dto.Role = "Donor";
+            return dto;
         }
 
         public async Task<UserDto> UpdateAsync(Guid id, UserDto userDto)
@@ -71,7 +88,17 @@ namespace Services
                 throw new InvalidOperationException("The original system administrator cannot be modified.");
             }
 
+            if (userDto.Email != user.Email)
+            {
+                var existingUser = await _userManager.FindByEmailAsync(userDto.Email);
+                if (existingUser != null && existingUser.Id != user.Id)
+                {
+                    throw new InvalidOperationException("Email is already taken");
+                }
+            }
+
             _mapper.Map(userDto, user);
+
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
@@ -80,7 +107,17 @@ namespace Services
                 throw new InvalidOperationException($"Failed to update user: {errors}");
             }
 
-            return _mapper.Map<UserDto>(user);
+            // تحديث الدور إذا تغير
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (!currentRoles.Contains(userDto.Role))
+            {
+                await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                await _userManager.AddToRoleAsync(user, userDto.Role);
+            }
+
+            var dto = _mapper.Map<UserDto>(user);
+            dto.Role = userDto.Role;
+            return dto;
         }
 
         public async Task<bool> DeleteAsync(Guid id)
@@ -152,7 +189,29 @@ namespace Services
         public async Task<IEnumerable<UserDto>> GetUsersInRoleAsync(string role)
         {
             var users = await _userManager.GetUsersInRoleAsync(role);
-            return users.Select(u => _mapper.Map<UserDto>(u));
+            var result = new List<UserDto>();
+            foreach (var user in users)
+            {
+                var dto = _mapper.Map<UserDto>(user);
+                dto.Role = role;
+                result.Add(dto);
+            }
+            return result;
+        }
+
+        public async Task<bool> ResetPasswordByEmailAsync(string email, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return false;
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            if (result.Succeeded)
+            {
+                user.RequiresPasswordReset = false;
+                await _userManager.UpdateAsync(user);
+            }
+            return result.Succeeded;
         }
     }
 } 

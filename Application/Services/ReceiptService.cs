@@ -5,11 +5,12 @@ namespace Services
 {
     public class ReceiptService : IReceiptService
     {
-        public Task<ReceiptDto> CreateAsync(CreateReceiptDto createReceiptDto)
+
+        public async Task<bool> GenerateReceiptAsync(int donationId)
         {
+
             throw new NotImplementedException();
         }
-
         public Task<byte[]> GeneratePdfAsync(int receiptId)
         {
             throw new NotImplementedException();

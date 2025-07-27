@@ -4,6 +4,7 @@ using AutoMapper;
 using Domain.Contracts;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using static Services.Specifications.CategorySpecifications;
 
 namespace Services
 {
@@ -35,9 +36,11 @@ namespace Services
             return true;
         }
 
-        public async Task<IEnumerable<CategoryDto>> GetAllAsync()
+        public async Task<IEnumerable<CategoryDto>> GetAllAsync(int pageNumber = 1)
         {
-            var categories = await _unitOfWork.Categories.GetAllAsync();
+            int pageSize = 5;
+            var spec = new CategoriesWithPaginationSpecification(pageNumber, pageSize);
+            var categories = await _unitOfWork.Categories.ListAsync(spec);
             return _mapper.Map<IEnumerable<CategoryDto>>(categories);
         }
 
@@ -56,6 +59,12 @@ namespace Services
             _unitOfWork.Categories.Update(category);
             await _unitOfWork.CompleteAsync();
             return _mapper.Map<CategoryDto>(category);
+        }
+
+        public async Task<int> GetCountAsync()
+        {
+            var spec = new AllCategoriesSpecification();
+            return await _unitOfWork.Categories.CountAsync(spec);
         }
     }
 } 

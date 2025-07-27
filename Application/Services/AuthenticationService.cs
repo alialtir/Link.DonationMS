@@ -36,7 +36,8 @@ namespace Services
                 Roles = roles.ToList(),
                 UserId = user.Id.ToString(),
                 UserName = user.UserName,
-                Email = user.Email
+                Email = user.Email,
+                RequiresPasswordReset = user.RequiresPasswordReset
             };
         }
 
@@ -63,7 +64,7 @@ namespace Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName ?? ""),
+                new Claim(ClaimTypes.Name, user.DisplayName ?? ""),
                 new Claim(ClaimTypes.Email, user.Email ?? "")
             };
             foreach (var role in roles)

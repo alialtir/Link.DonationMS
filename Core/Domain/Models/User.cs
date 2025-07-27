@@ -9,5 +9,7 @@ namespace Domain.Models
         public string DisplayName { get; set; }
 
         public List<Donation> Donations { get; set; } = new List<Donation>();
+
+        public bool RequiresPasswordReset { get; set; } = true;
     }
 }

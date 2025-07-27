@@ -1,10 +1,12 @@
 using Application.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Link.DonationMS.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class DonationsController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;

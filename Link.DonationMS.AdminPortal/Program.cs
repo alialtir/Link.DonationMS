@@ -1,5 +1,7 @@
 using Link.DonationMS.AdminPortal.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 namespace Link.DonationMS.AdminPortal
 {
@@ -9,7 +11,6 @@ namespace Link.DonationMS.AdminPortal
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddHttpClient();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -18,34 +19,81 @@ namespace Link.DonationMS.AdminPortal
                     options.LoginPath = "/Auth/Login";
                     options.LogoutPath = "/Auth/Logout";
                 });
+            builder.Services.AddHttpContextAccessor();
 
+            var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+            if (string.IsNullOrEmpty(apiBaseUrl))
+            {
+                throw new InvalidOperationException("ApiSettings:BaseUrl is not configured in appsettings.json");
+            }
+            
             builder.Services.AddHttpClient("ApiClient", client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7119/api/"); 
+                client.BaseAddress = new Uri(apiBaseUrl);
             });
 
             builder.Services.AddScoped<ApiService>();
 
+            builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+            builder.Services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new[]
+                {
+                    new CultureInfo("en"),
+                    new CultureInfo("ar")
+                };
+
+                foreach (var culture in supportedCultures)
+                {
+                    if (culture.Name.StartsWith("ar"))
+                    {
+                        culture.DateTimeFormat = new CultureInfo("en").DateTimeFormat;
+                        culture.NumberFormat = new CultureInfo("en").NumberFormat;
+                    }
+                    
+                    culture.NumberFormat.CurrencySymbol = "";
+                }
+
+                options.DefaultRequestCulture = new RequestCulture("en");
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+            });
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseRequestLocalization();
+
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Auth}/{action=Login}/{id?}");
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.Use(async (context, next) =>
+            {
+                if (context.User.Identity?.IsAuthenticated == true)
+                {
+                    if (!context.User.IsInRole("Admin"))
+                    {
+                        context.Response.Redirect("/Auth/Login");
+                        return;
+                    }
+                }
+                await next();
+            });
 
             app.Run();
         }

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="TitleArRequired" xml:space="preserve">
+    <value>Title in Arabic is required</value>
+  </data>
+  <data name="TitleArMaxLength" xml:space="preserve">
+    <value>Title in Arabic cannot exceed {0} characters</value>
+  </data>
+  <data name="TitleArArabicOnly" xml:space="preserve">
+    <value>Title in Arabic can only contain Arabic letters and spaces</value>
+  </data>
+  <data name="TitleEnRequired" xml:space="preserve">
+    <value>Title in English is required</value>
+  </data>
+  <data name="TitleEnMaxLength" xml:space="preserve">
+    <value>Title in English cannot exceed {0} characters</value>
+  </data>
+  <data name="TitleEnEnglishOnly" xml:space="preserve">
+    <value>Title in English can only contain English letters, numbers, spaces, hyphens, and dots</value>
+  </data>
+  <data name="DescriptionArMaxLength" xml:space="preserve">
+    <value>Description in Arabic cannot exceed {0} characters</value>
+  </data>
+  <data name="DescriptionArArabicOnly" xml:space="preserve">
+    <value>Description in Arabic can only contain Arabic letters, spaces, and common punctuation</value>
+  </data>
+  <data name="DescriptionEnMaxLength" xml:space="preserve">
+    <value>Description in English cannot exceed {0} characters</value>
+  </data>
+  <data name="DescriptionEnEnglishOnly" xml:space="preserve">
+    <value>Description in English can only contain English letters, numbers, spaces, and common punctuation</value>
+  </data>
+  <data name="GoalAmountRequired" xml:space="preserve">
+    <value>Goal amount is required</value>
+  </data>
+  <data name="GoalAmountGreaterThanZero" xml:space="preserve">
+    <value>Goal amount must be greater than 0</value>
+  </data>
+  <data name="GoalAmountValidNumber" xml:space="preserve">
+    <value>Goal amount must be a valid number with up to 2 decimal places</value>
+  </data>
+  <data name="EndDateRequired" xml:space="preserve">
+    <value>End date is required</value>
+  </data>
+  <data name="CategoryRequired" xml:space="preserve">
+    <value>Category is required</value>
+  </data>
+  <data name="ValidCategory" xml:space="preserve">
+    <value>Please select a valid category</value>
+  </data>
+  <data name="ImageExtensionMaxLength" xml:space="preserve">
+    <value>Image extension cannot exceed {0} characters</value>
+  </data>
+  <data name="ImageExtensionLettersNumbersOnly" xml:space="preserve">
+    <value>Image extension can only contain letters and numbers</value>
+  </data>
+  <data name="InvalidUsernamePassword" xml:space="preserve">
+    <value>Invalid username or password</value>
+  </data>
+  <data name="SystemAdministrator" xml:space="preserve">
+    <value>System Administrator</value>
+  </data>
+  <data name="SystemAdminCannotModify" xml:space="preserve">
+    <value>The original system administrator cannot be modified for security reasons</value>
+  </data>
+  <data name="NoAdmins" xml:space="preserve">
+    <value>No admins</value>
+  </data>
+  <data name="NoAdminsOnPage" xml:space="preserve">
+    <value>No admins on page {0}. <a href="{1}">Return to first page</a></value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>Back to List</value>
+  </data>
+  <data name="AddNewCampaign" xml:space="preserve">
+    <value>Add New Campaign</value>
+  </data>
+  <data name="EditCampaign" xml:space="preserve">
+    <value>Edit Campaign</value>
+  </data>
+  <data name="AddNewCategory" xml:space="preserve">
+    <value>Add New Category</value>
+  </data>
+  <data name="EditCategory" xml:space="preserve">
+    <value>Edit Category</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="TitleAr" xml:space="preserve">
+    <value>Title (Arabic) *</value>
+  </data>
+  <data name="TitleEn" xml:space="preserve">
+    <value>Title (English) *</value>
+  </data>
+  <data name="DescriptionAr" xml:space="preserve">
+    <value>Description (Arabic)</value>
+  </data>
+  <data name="DescriptionEn" xml:space="preserve">
+    <value>Description (English)</value>
+  </data>
+  <data name="GoalAmount" xml:space="preserve">
+    <value>Goal Amount</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="TitleArPlaceholder" xml:space="preserve">
+    <value>Enter title in Arabic (Arabic letters only)</value>
+  </data>
+  <data name="TitleEnPlaceholder" xml:space="preserve">
+    <value>Enter title in English</value>
+  </data>
+  <data name="DescriptionArPlaceholder" xml:space="preserve">
+    <value>Enter description in Arabic (Arabic letters only - optional)</value>
+  </data>
+  <data name="DescriptionEnPlaceholder" xml:space="preserve">
+    <value>Enter description in English (optional)</value>
+  </data>
+  <data name="CampaignTitleArPlaceholder" xml:space="preserve">
+    <value>Enter campaign title in Arabic (Arabic letters only)</value>
+  </data>
+  <data name="CampaignTitleEnPlaceholder" xml:space="preserve">
+    <value>Enter campaign title in English</value>
+  </data>
+  <data name="CampaignDescriptionArPlaceholder" xml:space="preserve">
+    <value>Enter campaign description in Arabic (Arabic letters only - optional)</value>
+  </data>
+  <data name="CampaignDescriptionEnPlaceholder" xml:space="preserve">
+    <value>Enter campaign description in English (optional)</value>
+  </data>
+</root> 

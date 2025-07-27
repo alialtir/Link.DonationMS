@@ -3,20 +3,35 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using DTOs.CampaignDTOs;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 
 namespace Link.DonationMS.AdminPortal.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class CampaignsController : Controller
     {
         private readonly ApiService _apiService;
-        public CampaignsController(ApiService apiService)
+        private readonly IConfiguration _configuration;
+        
+        public CampaignsController(ApiService apiService, IConfiguration configuration)
         {
             _apiService = apiService;
+            _configuration = configuration;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index(int page = 1)
         {
             var campaigns = await _apiService.GetCampaignsAsync(page);
+            var totalCount = await _apiService.GetCampaignsCountAsync();
+            var pageSize = _configuration.GetValue<int>("PageSize", 5);
+            
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            ViewBag.HasPreviousPage = page > 1;
+            ViewBag.HasNextPage = page < ViewBag.TotalPages && campaigns.Any();
+            
             return View(campaigns);
         }
 
@@ -61,7 +76,6 @@ namespace Link.DonationMS.AdminPortal.Controllers
                 }
             }
             
-    
             try
             {
                 var categories = await _apiService.GetCategoriesAsync();
@@ -76,12 +90,11 @@ namespace Link.DonationMS.AdminPortal.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, int page = 1)
         {
             var campaign = await _apiService.GetCampaignByIdAsync(id);
             if (campaign == null) return NotFound();
             
-      
             var updateDto = new UpdateCampaignDto
             {
                 TitleAr = campaign.TitleAr,
@@ -92,9 +105,10 @@ namespace Link.DonationMS.AdminPortal.Controllers
                 EndDate = campaign.EndDate,
                 CategoryId = campaign.CategoryId,
                 ImageData = campaign.ImageData,
-                ImageExtension = campaign.ImageExtension
+                ImageExtension = campaign.ImageExtension,
+                Status = campaign.Status
             };
-            
+            ViewBag.CurrentPage = page;
             try
             {
                 var categories = await _apiService.GetCategoriesAsync();
@@ -109,7 +123,7 @@ namespace Link.DonationMS.AdminPortal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, UpdateCampaignDto dto, IFormFile? imageFile)
+        public async Task<IActionResult> Edit(int id, UpdateCampaignDto dto, IFormFile? imageFile, int page = 1)
         {
             if (ModelState.IsValid)
             {
@@ -125,7 +139,7 @@ namespace Link.DonationMS.AdminPortal.Controllers
                     
                     await _apiService.UpdateCampaignAsync(id, dto);
                     TempData["Success"] = "Campaign updated successfully.";
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Index", new { page = page });
                 }
                 catch
                 {
@@ -133,7 +147,6 @@ namespace Link.DonationMS.AdminPortal.Controllers
                 }
             }
             
-           
             try
             {
                 var categories = await _apiService.GetCategoriesAsync();
@@ -143,12 +156,12 @@ namespace Link.DonationMS.AdminPortal.Controllers
             {
                 ViewBag.Categories = new SelectList(Enumerable.Empty<object>());
             }
-            
+            ViewBag.CurrentPage = page;
             return View(dto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, int page = 1)
         {
             try
             {
@@ -159,7 +172,7 @@ namespace Link.DonationMS.AdminPortal.Controllers
             {
                 TempData["Error"] = "Failed to delete campaign. Please try again.";
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { page = page });
         }
     }
-} 
+}

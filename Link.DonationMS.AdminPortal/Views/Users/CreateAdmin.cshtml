@@ -1,21 +1,43 @@
-@model DTOs.UserDTOs.RegisterUserDto
+@model DTOs.UserDTOs.CreateAdminDto
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>@SharedResource.GetString("AddUser")</h2>
+    <div class="d-flex align-items-center">
+        <a asp-action="Admins" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> @SharedResource.GetString("BackToList")
+        </a>
+    </div>
+</div>
+
 <form asp-action="CreateAdmin" method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display: none;"></div>
     <div class="mb-3">
-        <label>Name</label>
+        <label asp-for="DisplayName" class="form-label">@SharedResource.GetString("Name")</label>
         <input asp-for="DisplayName" class="form-control" />
         <span asp-validation-for="DisplayName" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label>Email</label>
+        <label asp-for="Email" class="form-label">@SharedResource.GetString("Email")</label>
         <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label>Password</label>
+        <label asp-for="Password" class="form-label">@SharedResource.GetString("Password")</label>
         <input asp-for="Password" type="password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-success">Save</button>
+    <div class="mb-3">
+        <label asp-for="Role" class="form-label">@SharedResource.GetString("Role")</label>
+        <select asp-for="Role" class="form-control">
+            <option value="">@SharedResource.GetString("SelectRole")</option>
+            <option value="Admin">@SharedResource.GetString("Admin")</option>
+            <option value="CampaignManager">@SharedResource.GetString("CampaignManager")</option>
+        </select>
+        <span asp-validation-for="Role" class="text-danger"></span>
+    </div>
+    
+    <button type="submit" class="btn btn-success">@SharedResource.GetString("Save")</button>
+    <a asp-action="Admins" class="btn btn-secondary">@SharedResource.GetString("Cancel")</a>
 </form>
 
 @section Scripts {

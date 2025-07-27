@@ -6,6 +6,8 @@ using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using static Services.Specifications.CampaignSpecifications;
 using System.Linq;
+using static Services.Specifications.DonationSpecifications;
+using System;
 
 namespace Services
 {
@@ -27,38 +29,19 @@ namespace Services
             campaign.StartDate = DateTime.UtcNow;
             await _unitOfWork.Campaigns.AddAsync(campaign);
             await _unitOfWork.CompleteAsync();
-            await _unitOfWork.Categories.GetByIdAsync(campaign.CategoryId);
             return _mapper.Map<CampaignResultDto>(campaign);
         }
 
-        public async Task<IEnumerable<CampaignResultDto>> GetAllAsync(int pageNumber = 1)
+        public async Task<IEnumerable<CampaignResultDto>> GetAllAsync(int pageNumber = 1, int pageSize = 6)
         {
-            int pageSize = 5;
             var spec = new CampaignsWithPaginationSpecification(pageNumber, pageSize);
             var campaigns = await _unitOfWork.Campaigns.ListAsync(spec);
             var result = new List<CampaignResultDto>();
-            var campaignsToUpdate = new List<Campaign>();
-            
             foreach (var campaign in campaigns)
             {
-                campaign.CurrentAmount = campaign.Donations?.Sum(d => d.Amount) ?? 0;
-                
-                var originalStatus = campaign.Status;
-                
-                if (campaign.CurrentAmount >= campaign.GoalAmount)
-                {
-                    campaign.Status = CampaignStatus.Completed;
-                }
-                else if (campaign.EndDate < DateTime.UtcNow)
-                {
-                    campaign.Status = CampaignStatus.Expired;
-                }
-                
-                if (originalStatus != campaign.Status)
-                {
-                    campaignsToUpdate.Add(campaign);
-                }
-                
+                var successfulDonationsSpec = new SuccessfulDonationsByCampaignSpecification(campaign.Id);
+                var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
+                campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
                 var dto = _mapper.Map<CampaignResultDto>(campaign);
                 if (campaign.Category != null)
                 {
@@ -71,60 +54,69 @@ namespace Services
                 }
                 result.Add(dto);
             }
-            
-            if (campaignsToUpdate.Any())
-            {
-                foreach (var campaign in campaignsToUpdate)
-                {
-                    _unitOfWork.Campaigns.Update(campaign);
-                }
-                await _unitOfWork.CompleteAsync();
-            }
-            
             return result;
+        }
+
+        public async Task<int> GetCountAsync()
+        {
+            var spec = new AllCampaignsSpecification();
+            return await _unitOfWork.Campaigns.CountAsync(spec);
         }
 
         public async Task<CampaignResultDto> GetByIdAsync(int id)
         {
-            var campaign = await _unitOfWork.Campaigns.GetByIdAsync(id);
+            var spec = new CampaignWithDetailsSpecification(id);
+            var campaign = await _unitOfWork.Campaigns.GetEntityWithSpecAsync(spec);
             if (campaign == null) return null;
-            
-            campaign.CurrentAmount = campaign.Donations?.Sum(d => d.Amount) ?? 0;
-            
-            var originalStatus = campaign.Status;
-            
-            if (campaign.CurrentAmount >= campaign.GoalAmount)
-            {
-                campaign.Status = CampaignStatus.Completed;
-            }
-            else if (campaign.EndDate < DateTime.UtcNow)
-            {
-                campaign.Status = CampaignStatus.Expired;
-            }
-            
-            if (originalStatus != campaign.Status)
-            {
-                _unitOfWork.Campaigns.Update(campaign);
-                await _unitOfWork.CompleteAsync();
-            }
-            
+            var successfulDonationsSpec = new SuccessfulDonationsByCampaignSpecification(campaign.Id);
+            var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
+            campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
             var dto = _mapper.Map<CampaignResultDto>(campaign);
             if (campaign.Category != null)
             {
-                dto.CategoryTitleAr = campaign.Category.TitleAr;
-                dto.CategoryTitleEn = campaign.Category.TitleEn;
+                dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr)
+                    ? campaign.Category.TitleAr
+                    : campaign.Category.TitleEn;
+                dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn)
+                    ? campaign.Category.TitleEn
+                    : campaign.Category.TitleAr;
             }
             return dto;
         }
 
         public async Task<CampaignResultDto> UpdateAsync(int id, UpdateCampaignDto updateCampaignDto)
         {
-            var campaign = await _unitOfWork.Campaigns.GetByIdAsync(id);
+            var spec = new CampaignWithDetailsSpecification(id);
+
+            var campaign = await _unitOfWork.Campaigns.GetEntityWithSpecAsync(spec);
+
             if (campaign == null) return null;
+
             _mapper.Map(updateCampaignDto, campaign);
+            
+            if (Enum.TryParse<CampaignStatus>(updateCampaignDto.Status, out var newStatus))
+            {
+                campaign.Status = newStatus;
+            }
+
             _unitOfWork.Campaigns.Update(campaign);
+
             await _unitOfWork.CompleteAsync();
-            return _mapper.Map<CampaignResultDto>(campaign);
+
+            var updatedCampaign = await _unitOfWork.Campaigns.GetEntityWithSpecAsync(spec);
+
+            var dto = _mapper.Map<CampaignResultDto>(updatedCampaign);
+
+            if (updatedCampaign.Category != null)
+            {
+                dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(updatedCampaign.Category.TitleAr)
+                    ? updatedCampaign.Category.TitleAr
+                    : updatedCampaign.Category.TitleEn;
+                dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(updatedCampaign.Category.TitleEn)
+                    ? updatedCampaign.Category.TitleEn
+                    : updatedCampaign.Category.TitleAr;
+            }
+            return dto;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -136,29 +128,116 @@ namespace Services
             return true;
         }
 
-        public Task<IEnumerable<CampaignResultDto>> GetActiveCampaignsAsync()
+        public async Task<decimal> GetCampaignProgressAsync(int id)
         {
-            throw new NotImplementedException();
+            var spec = new CampaignWithDetailsSpecification(id);
+            var campaign = await _unitOfWork.Campaigns.GetEntityWithSpecAsync(spec);
+            if (campaign == null) return 0;
+            
+            var successfulDonationsSpec = new SuccessfulDonationsByCampaignSpecification(id);
+            var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
+            var totalRaised = successfulDonations.Sum(d => d.Amount);
+            
+            if (campaign.GoalAmount <= 0) return 0;
+            var percentage = (totalRaised / campaign.GoalAmount) * 100;
+            return Math.Min(percentage, 100);
         }
 
-        public Task<decimal> GetCampaignProgressAsync(int id)
+        public async Task<IEnumerable<CampaignResultDto>> GetCampaignsByCategoryAsync(int categoryId)
         {
-            throw new NotImplementedException();
+            var spec = new CampaignsByCategorySpecification(categoryId);
+            var campaigns = await _unitOfWork.Campaigns.ListAsync(spec);
+            var result = new List<CampaignResultDto>();
+            foreach (var campaign in campaigns)
+            {
+                var successfulDonationsSpec = new SuccessfulDonationsByCampaignSpecification(campaign.Id);
+                var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
+                campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
+                var dto = _mapper.Map<CampaignResultDto>(campaign);
+                if (campaign.Category != null)
+                {
+                    dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr)
+                        ? campaign.Category.TitleAr
+                        : campaign.Category.TitleEn;
+                    dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn)
+                        ? campaign.Category.TitleEn
+                        : campaign.Category.TitleAr;
+                }
+                result.Add(dto);
+            }
+            return result;
         }
 
-        public Task<IEnumerable<CampaignResultDto>> GetCampaignsByCategoryAsync(int categoryId)
+        public async Task<IEnumerable<CampaignResultDto>> GetCompletedCampaignsAsync()
         {
-            throw new NotImplementedException();
+            var spec = new CompletedCampaignsSpecification();
+            var campaigns = await _unitOfWork.Campaigns.ListAsync(spec);
+            var result = new List<CampaignResultDto>();
+            foreach (var campaign in campaigns)
+            {
+                var successfulDonationsSpec = new SuccessfulDonationsByCampaignSpecification(campaign.Id);
+                var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
+                campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
+                var dto = _mapper.Map<CampaignResultDto>(campaign);
+                if (campaign.Category != null)
+                {
+                    dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr)
+                        ? campaign.Category.TitleAr
+                        : campaign.Category.TitleEn;
+                    dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn)
+                        ? campaign.Category.TitleEn
+                        : campaign.Category.TitleAr;
+                }
+                result.Add(dto);
+            }
+            return result;
         }
 
-        public Task<IEnumerable<CampaignResultDto>> GetCompletedCampaignsAsync()
+        public async Task<IEnumerable<CampaignResultDto>> SearchCampaignsByTitleAsync(string title)
         {
-            throw new NotImplementedException();
+            var spec = new CampaignsByTitleSpecification(title);
+            var campaigns = await _unitOfWork.Campaigns.ListAsync(spec);
+            var result = new List<CampaignResultDto>();
+            foreach (var campaign in campaigns)
+            {
+                var successfulDonationsSpec = new SuccessfulDonationsByCampaignSpecification(campaign.Id);
+                var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
+                campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
+                var dto = _mapper.Map<CampaignResultDto>(campaign);
+                if (campaign.Category != null)
+                {
+                    dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr)
+                        ? campaign.Category.TitleAr
+                        : campaign.Category.TitleEn;
+                    dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn)
+                        ? campaign.Category.TitleEn
+                        : campaign.Category.TitleAr;
+                }
+                result.Add(dto);
+            }
+            return result;
         }
 
-        public Task<IEnumerable<CampaignResultDto>> SearchCampaignsByTitleAsync(string title)
+        public async Task<IEnumerable<CampaignResultDto>> GetActiveCampaignsFilteredAsync(string title = null, int? categoryId = null, int pageNumber = 1, int pageSize = 5)
         {
-            throw new NotImplementedException();
+            var spec = new ActiveCampaignsFilteredSpecification(title, categoryId);
+            var campaigns = await _unitOfWork.Campaigns.ListAsync(spec);
+            var result = new List<CampaignResultDto>();
+            foreach (var campaign in campaigns)
+            {
+                var successfulDonationsSpec = new SuccessfulDonationsByCampaignSpecification(campaign.Id);
+                var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
+                campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
+                var dto = _mapper.Map<CampaignResultDto>(campaign);
+                if (campaign.Category != null)
+                {
+                    dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr) ? campaign.Category.TitleAr : campaign.Category.TitleEn;
+                    dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn) ? campaign.Category.TitleEn : campaign.Category.TitleAr;
+                }
+                result.Add(dto);
+            }
+            return result;
         }
+
     }
 } 

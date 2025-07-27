@@ -1,8 +1,13 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = SharedResource.GetString("HomePage");
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4"><localize key="Welcome" /></h1>
+    <p><localize key="LearnAbout" /> <a href="https://learn.microsoft.com/aspnet/core"><localize key="BuildingWebApps" /></a>.</p>
+</div>
+
+<!-- مثال على استخدام معاملات -->
+<div class="mt-4">
+    <p><localize key="NoAdminsOnPage" args="1, /Users/Admins?page=1" /></p>
 </div>

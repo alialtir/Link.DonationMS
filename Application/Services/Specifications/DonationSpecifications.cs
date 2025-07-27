@@ -34,6 +34,15 @@ namespace Services.Specifications
             }
         }
 
+        public class SuccessfulDonationsByCampaignSpecification : BaseSpecification<Donation, int>
+        {
+            public SuccessfulDonationsByCampaignSpecification(int campaignId) : base(d => 
+                d.CampaignId == campaignId && d.Status == DonationStatus.Successful)
+            {
+                
+            }
+        }
+
         public class PendingDonationsSpecification : BaseSpecification<Donation, int>
         {
             public PendingDonationsSpecification() : base(d => d.Status == DonationStatus.Pending)

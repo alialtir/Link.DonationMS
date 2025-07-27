@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Actions" xml:space="preserve">
+    <value>الإجراءات</value>
+  </data>
+  <data name="AddAdmin" xml:space="preserve">
+    <value>إضافة مدير</value>
+  </data>
+  <data name="AddCampaign" xml:space="preserve">
+    <value>إضافة حملة</value>
+  </data>
+  <data name="AddCategory" xml:space="preserve">
+    <value>إضافة فئة</value>
+  </data>
+  <data name="AddUser" xml:space="preserve">
+    <value>إضافة مستخدم</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>مدير</value>
+  </data>
+  <data name="Admins" xml:space="preserve">
+    <value>المدراء</value>
+  </data>
+  <data name="BackToList" xml:space="preserve">
+    <value>العودة للقائمة</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>الفئات</value>
+  </data>
+  <data name="CreateCampaign" xml:space="preserve">
+    <value>إنشاء حملة</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="DeleteConfirmation" xml:space="preserve">
+    <value>هل أنت متأكد من أنك تريد حذف هذا العنصر؟</value>
+  </data>
+  <data name="Donations" xml:space="preserve">
+    <value>التبرعات</value>
+  </data>
+  <data name="Donors" xml:space="preserve">
+    <value>المتبرعون</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>تعديل</value>
+  </data>
+  <data name="EditAdmin" xml:space="preserve">
+    <value>تعديل المدير</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>البريد الإلكتروني</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>الاسم</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>التالي</value>
+  </data>
+  <data name="NoAdmins" xml:space="preserve">
+    <value>لا توجد مدراء</value>
+  </data>
+  <data name="NoAdminsOnPage" xml:space="preserve">
+    <value>لا توجد مدراء في الصفحة {0}. <a href="{1}" class="alert-link">العودة للصفحة الأولى</a></value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>كلمة المرور</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>السابق</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>الدور</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>حفظ</value>
+  </data>
+  <data name="SelectRole" xml:space="preserve">
+    <value>اختر الدور</value>
+  </data>
+  <data name="SystemAdministrator" xml:space="preserve">
+    <value>مدير النظام</value>
+  </data>
+  <data name="SystemAdminCannotModify" xml:space="preserve">
+    <value>لا يمكن تعديل مدير النظام الأساسي</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>المستخدمون</value>
+  </data>
+  <data name="AdminPortal" xml:space="preserve">
+    <value>لوحة الإدارة</value>
+  </data>
+  <data name="Campaigns" xml:space="preserve">
+    <value>الحملات</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>تسجيل الخروج</value>
+  </data>
+  <data name="CategoryManagement" xml:space="preserve">
+    <value>إدارة الفئات</value>
+  </data>
+  <data name="CampaignManagement" xml:space="preserve">
+    <value>إدارة الحملات</value>
+  </data>
+  <data name="NoCategoriesOnPage" xml:space="preserve">
+    <value>لا توجد فئات في الصفحة {0}.</value>
+  </data>
+  <data name="NoCategoriesAvailable" xml:space="preserve">
+    <value>لا توجد فئات متاحة.</value>
+  </data>
+  <data name="NoCampaignsOnPage" xml:space="preserve">
+    <value>لا توجد حملات في الصفحة {0}.</value>
+  </data>
+  <data name="NoCampaignsAvailable" xml:space="preserve">
+    <value>لا توجد حملات متاحة.</value>
+  </data>
+  <data name="ReturnToFirstPage" xml:space="preserve">
+    <value>العودة للصفحة الأولى</value>
+  </data>
+  <data name="Image" xml:space="preserve">
+    <value>الصورة</value>
+  </data>
+  <data name="CurrentAmount" xml:space="preserve">
+    <value>المبلغ الحالي</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>الحالة</value>
+  </data>
+  <data name="DeleteCategoryConfirmation" xml:space="preserve">
+    <value>هل أنت متأكد من أنك تريد حذف هذه الفئة؟ لا يمكن التراجع عن هذا الإجراء.</value>
+  </data>
+  <data name="DeleteCampaignConfirmation" xml:space="preserve">
+    <value>هل أنت متأكد من أنك تريد حذف هذه الحملة؟ لا يمكن التراجع عن هذا الإجراء.</value>
+  </data>
+  <data name="TitleAr" xml:space="preserve">
+    <value>العنوان (عربي) *</value>
+  </data>
+  <data name="TitleEn" xml:space="preserve">
+    <value>العنوان (إنجليزي) *</value>
+  </data>
+  <data name="DescriptionAr" xml:space="preserve">
+    <value>الوصف (عربي)</value>
+  </data>
+  <data name="DescriptionEn" xml:space="preserve">
+    <value>الوصف (إنجليزي)</value>
+  </data>
+  <data name="GoalAmount" xml:space="preserve">
+    <value>المبلغ المستهدف</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>تاريخ الانتهاء</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>الفئة</value>
+  </data>
+  <data name="AddNewCampaign" xml:space="preserve">
+    <value>إضافة حملة جديدة</value>
+  </data>
+  <data name="EditCampaign" xml:space="preserve">
+    <value>تعديل الحملة</value>
+  </data>
+  <data name="AddNewCategory" xml:space="preserve">
+    <value>إضافة فئة جديدة</value>
+  </data>
+  <data name="EditCategory" xml:space="preserve">
+    <value>تعديل الفئة</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>تسجيل الدخول</value>
+  </data>
+  <data name="CampaignImage" xml:space="preserve">
+    <value>صورة الحملة</value>
+  </data>
+  <data name="SelectCategory" xml:space="preserve">
+    <value>-- اختر الفئة --</value>
+  </data>
+  <data name="NoUsersOnPage" xml:space="preserve">
+    <value>لا يوجد مستخدمون في الصفحة {0}.</value>
+  </data>
+  <data name="NoUsers" xml:space="preserve">
+    <value>لا يوجد مستخدمون</value>
+  </data>
+  <data name="NoDonations" xml:space="preserve">
+    <value>لا توجد تبرعات</value>
+  </data>
+  <data name="Donor" xml:space="preserve">
+    <value>المتبرع</value>
+  </data>
+  <data name="Campaign" xml:space="preserve">
+    <value>الحملة</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>المبلغ</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+</root> 

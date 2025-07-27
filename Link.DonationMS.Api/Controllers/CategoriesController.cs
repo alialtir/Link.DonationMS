@@ -1,11 +1,13 @@
 using Application.Services.Abstractions;
 using DTOs.CategoryDTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Link.DonationMS.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class CategoriesController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -14,11 +16,20 @@ namespace Link.DonationMS.Api.Controllers
             _serviceManager = serviceManager;
         }
 
+       
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1)
         {
-            var result = await _serviceManager.CategoryService.GetAllAsync();
+            var result = await _serviceManager.CategoryService.GetAllAsync(page);
             return Ok(result);
+        }
+
+        [HttpGet("count")]
+        public async Task<IActionResult> GetCount()
+        {
+            var count = await _serviceManager.CategoryService.GetCountAsync();
+            return Ok(count);
         }
 
         [HttpGet("{id}")]

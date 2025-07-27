@@ -131,6 +131,10 @@ namespace Persistence.Data.Migrations
                     b.Property<int>("CampaignId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ClientSecret")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
                     b.Property<DateTime>("DonationDate")
                         .HasColumnType("datetime2");
 
@@ -138,10 +142,6 @@ namespace Persistence.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("PaymentIntentId")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("SessionId")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
@@ -275,6 +275,9 @@ namespace Persistence.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("RequiresPasswordReset")
                         .HasColumnType("bit");
 
                     b.Property<string>("SecurityStamp")

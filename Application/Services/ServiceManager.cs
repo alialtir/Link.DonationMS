@@ -23,7 +23,7 @@ namespace Services
             DashboardService = new DashboardService();
             EmailNotificationService = new EmailNotificationService();
             ReceiptService = new ReceiptService();
-            PaymentService = new PaymentService();
+            PaymentService = new PaymentService(configuration,unitOfWork,mapper);
             AuthenticationService = new AuthenticationService(userManager, configuration);
         }
 

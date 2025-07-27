@@ -2,6 +2,7 @@ using Link.DonationMS.AdminPortal.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 [Authorize]
 public class HomeController : Controller
@@ -15,7 +16,11 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        return View();
+        if (!User.IsInRole("Admin"))
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+        return RedirectToAction("Index", "Campaigns");
     }
 
     public IActionResult Privacy()

@@ -22,9 +22,26 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Link.DonationMS API", Version = "v1" });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowCredentials()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("DefaultConnection is not configured in appsettings.json");
+}
+
 builder.Services.AddDbContext<DonationDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(connectionString);
 
     // options.UseOpenIddict<Guid>();
 });
@@ -36,24 +53,38 @@ builder.Services.AddIdentity<Domain.Models.User, Microsoft.AspNetCore.Identity.I
 
 builder.Services.Configure<Microsoft.AspNetCore.Identity.IdentityOptions>(options =>
 {
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
+    var config = builder.Configuration.GetSection("Identity");
+    options.Password.RequireDigit = config.GetSection("Password:RequireDigit").Get<bool>();
+    options.Password.RequireLowercase = config.GetSection("Password:RequireLowercase").Get<bool>();
+    options.Password.RequireNonAlphanumeric = config.GetSection("Password:RequireNonAlphanumeric").Get<bool>();
+    options.Password.RequireUppercase = config.GetSection("Password:RequireUppercase").Get<bool>();
+    options.Password.RequiredLength = config.GetSection("Password:RequiredLength").Get<int>();
+    options.Password.RequiredUniqueChars = config.GetSection("Password:RequiredUniqueChars").Get<int>();
 
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.Parse(config.GetSection("Lockout:DefaultLockoutTimeSpan").Value);
+    options.Lockout.MaxFailedAccessAttempts = config.GetSection("Lockout:MaxFailedAccessAttempts").Get<int>();
+    options.Lockout.AllowedForNewUsers = config.GetSection("Lockout:AllowedForNewUsers").Get<bool>();
 
-    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-    options.User.RequireUniqueEmail = true;
+    options.User.AllowedUserNameCharacters = config.GetSection("User:AllowedUserNameCharacters").Value;
+    options.User.RequireUniqueEmail = config.GetSection("User:RequireUniqueEmail").Get<bool>();
 });
 
 var jwtKey = builder.Configuration["jwtOptions:SecretKey"];
 var jwtIssuer = builder.Configuration["jwtOptions:Issuer"];
 var jwtAudience = builder.Configuration["jwtOptions:Audience"];
+
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new InvalidOperationException("jwtOptions:SecretKey is not configured");
+}
+if (string.IsNullOrEmpty(jwtIssuer))
+{
+    throw new InvalidOperationException("jwtOptions:Issuer is not configured");
+}
+if (string.IsNullOrEmpty(jwtAudience))
+{
+    throw new InvalidOperationException("jwtOptions:Audience is not configured");
+}
 
 builder.Services.AddAuthentication(options =>
 {
@@ -70,7 +101,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtIssuer,
         ValidAudience = jwtAudience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey ?? "your-super-secret-key-with-at-least-256-bits"))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 
@@ -92,6 +123,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAngular");
+
+app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -100,9 +135,18 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<DonationDbContext>();
-    context.Database.Migrate();
-    await SeedDataAsync(context, scope.ServiceProvider);
+    try
+    {
+        var context = scope.ServiceProvider.GetRequiredService<DonationDbContext>();
+        context.Database.Migrate();
+        await SeedDataAsync(context, scope.ServiceProvider);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database or seeding data.");
+        throw;
+    }
 }
 
 app.Run();
@@ -140,5 +184,6 @@ static async Task SeedDataAsync(DonationDbContext context, IServiceProvider serv
             await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
+
 
 }

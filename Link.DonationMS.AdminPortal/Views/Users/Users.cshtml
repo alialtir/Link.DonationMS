@@ -1,0 +1,66 @@
+@model IEnumerable<DTOs.UserDTOs.UserDto>
+@if (!Model.Any())
+{
+    <div class="alert alert-warning text-center" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; font-size: 1.2em;">
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <span>@SharedResource.GetString("NoUsersOnPage", ViewBag.CurrentPage) <a asp-action="Users" asp-route-page="1" class="alert-link">@SharedResource.GetString("ReturnToFirstPage")</a></span>
+        }
+        else
+        {
+            <span>@SharedResource.GetString("NoUsers")</span>
+        }
+    </div>
+}
+else
+{
+<table class="table">
+    <thead>
+        <tr>
+            <th>@SharedResource.GetString("Name")</th>
+            <th>@SharedResource.GetString("Email")</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.DisplayName</td>
+                <td>@user.Email</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (Model.Any() && ViewBag.TotalPages > 1)
+{
+    <nav aria-label="Users pagination">
+        <ul class="pagination justify-content-center">
+            @if (ViewBag.HasPreviousPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Users" asp-route-page="@(ViewBag.CurrentPage - 1)">
+                        <i class="fas fa-chevron-left"></i> @SharedResource.GetString("Previous")
+                    </a>
+                </li>
+            }
+            
+            @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+            {
+                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Users" asp-route-page="@i">@i</a>
+                </li>
+            }
+            
+            @if (ViewBag.HasNextPage)
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Users" asp-route-page="@(ViewBag.CurrentPage + 1)">
+                        @SharedResource.GetString("Next") <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+} 

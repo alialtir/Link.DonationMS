@@ -70,5 +70,24 @@ namespace Services.Specifications
                 ApplyPagination(pageNumber, pageSize);
             }
         }
+
+        public class AllCampaignsSpecification : BaseSpecification<Campaign, int>
+        {
+            public AllCampaignsSpecification() : base()
+            {
+            }
+        }
+
+        public class ActiveCampaignsFilteredSpecification : BaseSpecification<Campaign, int>
+        {
+            public ActiveCampaignsFilteredSpecification(string title = null, int? categoryId = null)
+                : base(c => c.Status == CampaignStatus.Active &&
+                    (string.IsNullOrEmpty(title) || c.TitleAr.Contains(title) || c.TitleEn.Contains(title)) &&
+                    (!categoryId.HasValue || c.CategoryId == categoryId.Value))
+            {
+                AddInclude(c => c.Category);
+                AddOrderBy(c => c.EndDate);
+            }
+        }
     }
 } 
