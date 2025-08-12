@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Persistence.Data.Migrations
 {
     /// <inheritdoc />
@@ -31,6 +33,8 @@ namespace Persistence.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DisplayNameAr = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RequiresPasswordReset = table.Column<bool>(type: "bit", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -65,6 +69,22 @@ namespace Persistence.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NotificationTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TypeId = table.Column<int>(type: "int", nullable: false),
+                    Subject = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LanguageId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NotificationTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -250,6 +270,39 @@ namespace Persistence.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    To = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CC = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BCC = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Subject = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LanguageId = table.Column<int>(type: "int", nullable: false),
+                    NotificationTypeId = table.Column<int>(type: "int", nullable: false),
+                    IsSent = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Notifications_NotificationTypes_NotificationTypeId",
+                        column: x => x.NotificationTypeId,
+                        principalTable: "NotificationTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OpenIddictAuthorizations",
                 columns: table => new
                 {
@@ -277,14 +330,12 @@ namespace Persistence.Data.Migrations
                 name: "Donations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     IsAnonymous = table.Column<bool>(type: "bit", nullable: false),
                     DonationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    SessionId = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
-                    PaymentIntentId = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
+                    PaymentId = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
                     CampaignId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
@@ -338,45 +389,14 @@ namespace Persistence.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EmailNotifications",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DonationId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    RecipientEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Subject = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsSent = table.Column<bool>(type: "bit", nullable: false),
-                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EmailNotifications", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_EmailNotifications_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_EmailNotifications_Donations_DonationId",
-                        column: x => x.DonationId,
-                        principalTable: "Donations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Receipts",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DonationId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DonationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ReceiptNumber = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -387,6 +407,19 @@ namespace Persistence.Data.Migrations
                         principalTable: "Donations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "NotificationTypes",
+                columns: new[] { "Id", "Body", "LanguageId", "Subject", "TypeId" },
+                values: new object[,]
+                {
+                    { 1, "تم استلام تبرعك بمبلغ {{Amount}} لحملة {{CampaignName}}. رقم الإيصال: {{ReceiptNumber}}", 1, "شكراً لتبرعك يا {{DonorName}}", 1 },
+                    { 2, "We have received your donation of {{Amount}} to {{CampaignName}}. Receipt No: {{ReceiptNumber}}", 2, "Thank you for your donation {{DonorName}}", 1 },
+                    { 3, "مرحباً {{UserName}},\n\nشكراً لتسجيلك في منصة التبرعات. يمكنك الآن تسجيل الدخول والبدء في دعم الحملات المفضلة لديك.", 1, "مرحباً بك في منصة التبرعات", 3 },
+                    { 4, "Hello {{UserName}},\n\nThank you for registering with our donation platform. You can now log in and start supporting your favorite campaigns.", 2, "Welcome to Donation Platform", 3 },
+                    { 5, "نود إبلاغك بأنه تم تحقيق هدف حملة {{CampaignName}}. شكراً لدعمكم الكريم", 1, "تم تحقيق هدف حملة {{CampaignName}}", 2 },
+                    { 6, "We are pleased to inform you that the campaign {{CampaignName}} has reached its funding goal. Thank you for your support!", 2, "Campaign {{CampaignName}} Goal Reached", 2 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -444,13 +477,13 @@ namespace Persistence.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmailNotifications_DonationId",
-                table: "EmailNotifications",
-                column: "DonationId");
+                name: "IX_Notifications_NotificationTypeId",
+                table: "Notifications",
+                column: "NotificationTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmailNotifications_UserId",
-                table: "EmailNotifications",
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -515,7 +548,7 @@ namespace Persistence.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "EmailNotifications");
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictScopes");
@@ -528,6 +561,9 @@ namespace Persistence.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "NotificationTypes");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictAuthorizations");

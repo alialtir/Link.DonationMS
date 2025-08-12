@@ -1,3 +1,4 @@
+using DTOs.DashboardDTOs;
 using DTOs.DonationDTOs;
 
 
@@ -5,15 +6,16 @@ namespace Application.Services.Abstractions
 {
     public interface IDonationService
     {
-        Task<DonationResultDto> GetByIdAsync(int id);
+        Task<DonationResultDto> GetByIdAsync(Guid id);
         Task<IEnumerable<DonationResultDto>> GetAllAsync(int pageNumber = 1);
         Task<IEnumerable<DonationResultDto>> GetDonationsByUserAsync(Guid userId);
         Task<IEnumerable<DonationResultDto>> GetDonationsByCampaignAsync(int campaignId);
-        Task<DonationResultDto> CreateAsync(CreateDonationDto createDonationDto);
-        Task<bool> UpdateDonationStatusAsync(int id, UpdateDonationStatusDto updateStatusDto);
-        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<RecentDonorDto>> GetRecentDonorsAsync(int count = 5, int? campaignId = null);
+        Task<DonationPaymentResultDto> CreateAsync(CreateDonationDto createDonationDto);
+        Task<bool> UpdateDonationStatusAsync(Guid id, UpdateDonationStatusDto updateStatusDto);
+        Task<bool> DeleteAsync(Guid id);
         Task<decimal> GetTotalDonationsByCampaignAsync(int campaignId);
-        Task<bool> ProcessPaymentAsync(int donationId, string paymentIntentId);
+        Task<bool> ProcessPaymentAsync(Guid donationId, string paymentIntentId);
      
     }
 } 

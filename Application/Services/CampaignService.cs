@@ -1,5 +1,6 @@
 using Application.Services.Abstractions;
 using DTOs.CampaignDTOs;
+using DTOs.DonationDTOs;
 using AutoMapper;
 using Domain.Contracts;
 using Domain.Models;
@@ -15,11 +16,13 @@ namespace Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly INotificationService _notificationService;
 
-        public CampaignService(IUnitOfWork unitOfWork, IMapper mapper)
+        public CampaignService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<CampaignResultDto> CreateAsync(CreateCampaignDto createCampaignDto)
@@ -238,6 +241,44 @@ namespace Services
             }
             return result;
         }
+
+        public async Task UpdateCampaignProgressAsync(DTOs.DonationDTOs.DonationProgressDto dto)
+        {
+            var campaign = await _unitOfWork.Campaigns.GetByIdAsync(dto.CampaignId);
+            if (campaign == null) return;
+
+            var wasGoalReached = campaign.CurrentAmount >= campaign.GoalAmount;
+            campaign.CurrentAmount += dto.Amount;
+
+            if (campaign.Status == CampaignStatus.Active &&
+                campaign.CurrentAmount >= campaign.GoalAmount &&
+                !wasGoalReached) // Only create notification if goal just reached
+            {
+                campaign.Status = CampaignStatus.Completed;
+                
+                // Create campaign goal reached notification
+                try
+                {
+await _notificationService.CreateNotificationAsync(
+                        NotificationTypeId.CampaignGoalReached,
+                        "admin@linkdonation.com", // Admin email - يمكن ضبطه
+                        new
+                        {
+                            CampaignName = !string.IsNullOrWhiteSpace(campaign.TitleAr) ? campaign.TitleAr : campaign.TitleEn
+                        },
+                        NotificationLanguage.Arabic 
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't break the donation process
+                    // You can add logging here if needed
+                }
+            }
+
+            _unitOfWork.Campaigns.Update(campaign);
+        }
+
 
     }
 } 

@@ -17,12 +17,14 @@ namespace Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
+        private readonly INotificationService _notificationService;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<User> userManager)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, UserManager<User> userManager, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _notificationService = notificationService;
         }
 
         public async Task<UserDto> GetByIdAsync(Guid id)
@@ -69,8 +71,30 @@ namespace Services
                 throw new InvalidOperationException($"Failed to create user: {errors}");
             }
 
-            // تعيين دور Donor افتراضياً للمستخدمين الجدد
+            // Set default role to Donor for new users
             await _userManager.AddToRoleAsync(user, "Donor");
+
+            // Create welcome notification after successful registration
+            try
+            {
+await _notificationService.CreateNotificationAsync(
+                    NotificationTypeId.Register,
+                    user.Email,
+                    new
+                    {
+                        UserName = user.DisplayName ?? user.UserName
+                    },
+                    NotificationLanguage.Arabic
+                );
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't break the registration process
+                // You can add logging here if needed
+            }
+
+            // Save notification in the same transaction
+            await _unitOfWork.CompleteAsync();
 
             var dto = _mapper.Map<UserDto>(user);
             dto.Role = "Donor";
@@ -107,7 +131,7 @@ namespace Services
                 throw new InvalidOperationException($"Failed to update user: {errors}");
             }
 
-            // تحديث الدور إذا تغير
+            // Update role if changed
             var currentRoles = await _userManager.GetRolesAsync(user);
             if (!currentRoles.Contains(userDto.Role))
             {

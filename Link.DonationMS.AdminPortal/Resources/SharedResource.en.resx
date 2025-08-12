@@ -91,6 +91,10 @@
   <data name="CreateCampaign" xml:space="preserve">
     <value>Create Campaign</value>
   </data>
+  <data name="CurrencySymbol" xml:space="preserve">
+    <value>$</value>
+  </data>
+  <data name="CampaignNumber" xml:space="preserve"><value>Campaign # {0}</value></data>
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
@@ -135,6 +139,9 @@
   </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
+  </data>
+  <data name="CollectedAmount" xml:space="preserve">
+    <value>Current Amount</value>
   </data>
   <data name="SelectRole" xml:space="preserve">
     <value>Select Role</value>

@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Donor History Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <h2 class="mb-3">@SharedResource.GetString("DonorHistoryReport")</h2>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <iframe src="@ViewBag.ReportUrl" width="100%" height="800" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+</div>

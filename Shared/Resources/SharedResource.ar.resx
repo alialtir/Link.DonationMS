@@ -162,6 +162,21 @@
   <data name="Donations" xml:space="preserve">
     <value>التبرعات</value>
   </data>
+  <data name="Donor" xml:space="preserve">
+    <value>المتبرع</value>
+  </data>
+  <data name="Campaign" xml:space="preserve">
+    <value>الحملة</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>المبلغ</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>التاريخ</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>الحالة</value>
+  </data>
   <data name="AdminPortal" xml:space="preserve">
     <value>لوحة الإدارة</value>
   </data>
@@ -291,4 +306,24 @@
   <data name="PrivacyPolicyDescription" xml:space="preserve">
     <value>استخدم هذه الصفحة لتفاصيل سياسة الخصوصية لموقعك.</value>
   </data>
+  <data name="Dashboard" xml:space="preserve"><value>لوحة التحكم</value></data>
+  <data name="TotalDonations" xml:space="preserve"><value>إجمالي التبرعات</value></data>
+  <data name="TotalDonors" xml:space="preserve"><value>عدد المتبرعين</value></data>
+  <data name="ActiveCampaigns" xml:space="preserve"><value>عدد الحملات النشطة</value></data>
+  <data name="AverageDonation" xml:space="preserve"><value>متوسط التبرع</value></data>
+  <data name="CollectedAmountsTopCampaigns" xml:space="preserve"><value>المبالغ المحصلة للحملات الأعلى أداءً</value></data>
+  <data name="ProgressRatios" xml:space="preserve"><value>نسب التقدم</value></data>
+  <data name="TopCampaignsDetails" xml:space="preserve"><value>تفاصيل أعلى الحملات أداءً</value></data>
+  <data name="CampaignName" xml:space="preserve"><value>اسم الحملة</value></data>
+  <data name="Goal" xml:space="preserve"><value>الهدف</value></data>
+  
+  <data name="ProgressPercentage" xml:space="preserve"><value>نسبة التقدم</value></data>
+  <data name="Status" xml:space="preserve"><value>الحالة</value></data>
+  <data name="Completed" xml:space="preserve"><value>مكتملة</value></data>
+  <data name="Advanced" xml:space="preserve"><value>متقدمة</value></data>
+  <data name="Medium" xml:space="preserve"><value>متوسطة</value></data>
+  <data name="Initial" xml:space="preserve"><value>بداية</value></data>
+  <data name="CollectedAmount" xml:space="preserve"><value>المبلغ الحالي</value></data>
+  <data name="CurrencySymbol" xml:space="preserve"><value>$</value></data>
+  <data name="CurrentAmountLabel" xml:space="preserve"><value>المبلغ الحالي ($)</value></data>
 </root> 

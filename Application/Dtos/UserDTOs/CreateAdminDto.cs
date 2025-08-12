@@ -7,6 +7,7 @@ namespace DTOs.UserDTOs
         [Required]
         public string DisplayName { get; set; }
 
+
         [Required, EmailAddress]
         public string Email { get; set; }
 
@@ -14,6 +15,6 @@ namespace DTOs.UserDTOs
         public string Password { get; set; }
 
         [Required]
-        public string Role { get; set; } // Admin أو CampaignManager
+        public string Role { get; set; } // Admin or CampaignManager
     }
 }

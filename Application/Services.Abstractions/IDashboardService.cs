@@ -7,6 +7,5 @@ namespace Application.Services.Abstractions
         Task<decimal> GetTotalDonationsAsync();
         Task<int> GetTotalDonorsAsync();
         Task<IEnumerable<CampaignProgressDto>> GetTopCampaignsAsync();
-        Task<IEnumerable<DonorHistoryDto>> GetDonorHistoryAsync(Guid userId);
     }
 } 

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -9,13 +9,16 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="15.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.17" />
+    <PackageReference Include="QuestPDF" Version="2022.12.15" />
     <PackageReference Include="Stripe.net" Version="48.3.0" />
+    <PackageReference Include="MailKit" Version="4.13.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Domain\Domain.csproj" />
     <ProjectReference Include="..\Services.Abstractions\Services.Abstractions.csproj" />
     <ProjectReference Include="..\Dtos\DTOs.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Persistence\Persistence.csproj" />
   </ItemGroup>
 
 </Project>

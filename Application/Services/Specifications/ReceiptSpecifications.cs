@@ -8,7 +8,7 @@ namespace Services.Specifications
     {
         public class ReceiptByDonationSpecification : BaseSpecification<Receipt, int>
         {
-            public ReceiptByDonationSpecification(int donationId) : base(r => r.DonationId == donationId)
+            public ReceiptByDonationSpecification(Guid donationId) : base(r => r.DonationId == donationId)
             {
                 AddInclude(r => r.Donation);
                 AddInclude(r => r.Donation.Campaign);
@@ -22,6 +22,7 @@ namespace Services.Specifications
             {
                 AddInclude(r => r.Donation);
                 AddInclude(r => r.Donation.Campaign);
+                AddInclude(r => r.Donation.User);
                 AddOrderByDescending(r => r.Donation.DonationDate);
             }
         }

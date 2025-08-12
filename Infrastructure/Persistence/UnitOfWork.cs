@@ -1,4 +1,4 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Persistence.Data;
@@ -21,16 +21,18 @@ namespace Persistence
             _context = context;
             _userManager = userManager;
             Campaigns = new GenericRepository<Campaign, int>(_context);
-            Donations = new GenericRepository<Donation, int>(_context);
-            EmailNotifications = new GenericRepository<EmailNotification, int>(_context);
+            Donations = new GenericRepository<Donation, Guid>(_context);
+            Notifications = new GenericRepository<Notification, int>(_context);
+            NotificationTypes = new GenericRepository<NotificationType, int>(_context);
             Categories = new GenericRepository<Category, int>(_context);
             Receipts = new GenericRepository<Receipt, int>(_context);
             Users = new UserRepository(_context, _userManager);
         }
 
         public IGenericRepository<Campaign, int> Campaigns { get; private set; }
-        public IGenericRepository<Donation, int> Donations { get; private set; }
-        public IGenericRepository<EmailNotification, int> EmailNotifications { get; private set; }
+        public IGenericRepository<Donation, Guid> Donations { get; private set; }
+        public IGenericRepository<Notification, int> Notifications { get; private set; }
+        public IGenericRepository<NotificationType, int> NotificationTypes { get; private set; }
         public IGenericRepository<Category, int> Categories { get; private set; }
         public IGenericRepository<Receipt, int> Receipts { get; private set; }
         public IUserRepository Users { get; private set; }

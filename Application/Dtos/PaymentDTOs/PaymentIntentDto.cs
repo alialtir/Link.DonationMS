@@ -4,6 +4,6 @@ namespace DTOs.PaymentDTOs
     {
         public string Id { get; set; }
         public string ClientSecret { get; set; }
-        public int DonationId { get; set; }
+        public Guid DonationId { get; set; }
     }
 } 

@@ -51,7 +51,7 @@ namespace Link.DonationMS.AdminPortal.Controllers
                 }
                 if (result.Roles == null || !result.Roles.Contains("Admin"))
                 {
-                    ModelState.AddModelError("", "غير مسموح لك بالدخول");
+                    ModelState.AddModelError("", "You are not authorized to access this area");
                     return View(model);
                 }
                 if (result.RequiresPasswordReset)

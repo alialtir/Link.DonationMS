@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -30,7 +30,7 @@ namespace DTOs.CampaignDTOs
 
         [LocalizedRequired("GoalAmountRequired")]
         [LocalizedRange(0.01, double.MaxValue, "GoalAmountGreaterThanZero")]
-        [LocalizedRegularExpression(@"^[0-9]+(\.[0-9]{1,2})?$", "GoalAmountValidNumber")]
+        [LocalizedRegularExpression(@"^[0-9]+([\.,][0-9]{1,2})?$", "GoalAmountValidNumber")]
         public decimal GoalAmount { get; set; }
 
         [LocalizedRequired("EndDateRequired")]

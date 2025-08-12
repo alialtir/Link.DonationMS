@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -10,6 +10,6 @@ namespace DTOs.ReceiptDTOs
     public class CreateReceiptDto
     {
         [Required]
-        public int DonationId { get; set; }
+        public Guid DonationId { get; set; }
     }
 }

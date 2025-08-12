@@ -7,9 +7,9 @@ namespace Application.Services.Abstractions
         ICategoryService CategoryService { get; }
         IUserService UserService { get; }
         IDashboardService DashboardService { get; }
-        IEmailNotificationService EmailNotificationService { get; }
+        INotificationService NotificationService { get; }
         IReceiptService ReceiptService { get; }
-        IPaymentService PaymentService { get; }
+        IPaymentGatewayService PaymentGatewayService { get; }
         IAuthenticationService AuthenticationService { get; }
     }
 } 

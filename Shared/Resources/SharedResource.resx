@@ -303,4 +303,24 @@
   <data name="PrivacyPolicyDescription" xml:space="preserve">
     <value>Use this page to detail your site's privacy policy.</value>
   </data>
+  <data name="Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="TotalDonations" xml:space="preserve"><value>Total Donations</value></data>
+  <data name="TotalDonors" xml:space="preserve"><value>Total Donors</value></data>
+  <data name="ActiveCampaigns" xml:space="preserve"><value>Active Campaigns</value></data>
+  <data name="AverageDonation" xml:space="preserve"><value>Average Donation</value></data>
+  <data name="CollectedAmountsTopCampaigns" xml:space="preserve"><value>Collected Amounts (Top Campaigns)</value></data>
+  <data name="ProgressRatios" xml:space="preserve"><value>Progress Ratios</value></data>
+  <data name="TopCampaignsDetails" xml:space="preserve"><value>Top Campaigns Details</value></data>
+  <data name="CampaignName" xml:space="preserve"><value>Campaign Name</value></data>
+  <data name="Goal" xml:space="preserve"><value>Goal</value></data>
+  <data name="CollectedAmount" xml:space="preserve"><value>Current Amount</value></data>
+  <data name="ProgressPercentage" xml:space="preserve"><value>Progress %</value></data>
+  <data name="Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Completed" xml:space="preserve"><value>Completed</value></data>
+  <data name="Advanced" xml:space="preserve"><value>Advanced</value></data>
+  <data name="Medium" xml:space="preserve"><value>Medium</value></data>
+  <data name="Initial" xml:space="preserve"><value>Initial</value></data>
+  <data name="CampaignNumber" xml:space="preserve"><value>Campaign # {0}</value></data>
+  <data name="CurrentAmountLabel" xml:space="preserve"><value>Current Amount ($)</value></data>
+  <data name="CurrencySymbol" xml:space="preserve"><value>$</value></data>
 </root> 

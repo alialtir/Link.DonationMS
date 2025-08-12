@@ -6,7 +6,7 @@ namespace Services.Specifications
 {
     public class DonationSpecifications
     {
-        public class DonationsByUserSpecification : BaseSpecification<Donation, int>
+        public class DonationsByUserSpecification : BaseSpecification<Donation, Guid>
         {
             public DonationsByUserSpecification(Guid userId) : base(d => d.UserId == userId)
             {
@@ -15,7 +15,7 @@ namespace Services.Specifications
             }
         }
 
-        public class DonationsByCampaignSpecification : BaseSpecification<Donation, int>
+        public class DonationsByCampaignSpecification : BaseSpecification<Donation, Guid>
         {
             public DonationsByCampaignSpecification(int campaignId) : base(d => d.CampaignId == campaignId)
             {
@@ -24,7 +24,7 @@ namespace Services.Specifications
             }
         }
 
-        public class SuccessfulDonationsSpecification : BaseSpecification<Donation, int>
+        public class SuccessfulDonationsSpecification : BaseSpecification<Donation, Guid>
         {
             public SuccessfulDonationsSpecification() : base(d => d.Status == DonationStatus.Successful)
             {
@@ -34,7 +34,7 @@ namespace Services.Specifications
             }
         }
 
-        public class SuccessfulDonationsByCampaignSpecification : BaseSpecification<Donation, int>
+        public class SuccessfulDonationsByCampaignSpecification : BaseSpecification<Donation, Guid>
         {
             public SuccessfulDonationsByCampaignSpecification(int campaignId) : base(d => 
                 d.CampaignId == campaignId && d.Status == DonationStatus.Successful)
@@ -43,7 +43,7 @@ namespace Services.Specifications
             }
         }
 
-        public class PendingDonationsSpecification : BaseSpecification<Donation, int>
+        public class PendingDonationsSpecification : BaseSpecification<Donation, Guid>
         {
             public PendingDonationsSpecification() : base(d => d.Status == DonationStatus.Pending)
             {
@@ -53,7 +53,7 @@ namespace Services.Specifications
             }
         }
 
-        public class FailedDonationsSpecification : BaseSpecification<Donation, int>
+        public class FailedDonationsSpecification : BaseSpecification<Donation, Guid>
         {
             public FailedDonationsSpecification() : base(d => d.Status == DonationStatus.Failed)
             {
@@ -63,9 +63,9 @@ namespace Services.Specifications
             }
         }
 
-        public class DonationWithDetailsSpecification : BaseSpecification<Donation, int>
+        public class DonationWithDetailsSpecification : BaseSpecification<Donation, Guid>
         {
-            public DonationWithDetailsSpecification(int id) : base(d => d.Id == id)
+            public DonationWithDetailsSpecification(Guid id) : base(d => d.Id == id)
             {
                 AddInclude(d => d.Campaign);
                 AddInclude(d => d.User);
@@ -73,7 +73,7 @@ namespace Services.Specifications
             }
         }
 
-        public class AnonymousDonationsSpecification : BaseSpecification<Donation, int>
+        public class AnonymousDonationsSpecification : BaseSpecification<Donation, Guid>
         {
             public AnonymousDonationsSpecification() : base(d => d.IsAnonymous == true)
             {
@@ -82,7 +82,52 @@ namespace Services.Specifications
             }
         }
 
-        public class DonationsWithPaginationSpecification : BaseSpecification<Donation, int>
+        public class DonationByStripeIdsSpecification : BaseSpecification<Donation, Guid>
+        {
+            public DonationByStripeIdsSpecification(string sessionId, string paymentIntentId) : base(d =>
+                (sessionId != null && d.PaymentId == sessionId) ||
+                (paymentIntentId != null && d.PaymentId == paymentIntentId))
+            {
+                AddInclude(d => d.Campaign);
+                AddInclude(d => d.User);
+            }
+        }
+
+        public class DonationsByCampaignWithUserSpecification : BaseSpecification<Donation, Guid>
+        {
+            public DonationsByCampaignWithUserSpecification(int campaignId) : base(d => d.CampaignId == campaignId)
+            {
+                AddInclude(d => d.User);
+            }
+        }
+
+        public class RecentRandomDonationsWithUserSpecification : BaseSpecification<Donation, Guid>
+        {
+            public RecentRandomDonationsWithUserSpecification(int count) : base()
+            {
+                AddInclude(d => d.User);
+                // Order by NEWID() for random ordering in SQL Server
+                AddOrderBy(d => Guid.NewGuid());
+                ApplyPagination(1, count);
+            }
+
+            public RecentRandomDonationsWithUserSpecification(int campaignId, int count) : base(d => d.CampaignId == campaignId)
+            {
+                AddInclude(d => d.User);
+                AddOrderBy(d => Guid.NewGuid());
+                ApplyPagination(1, count);
+            }
+        }
+
+        public class DonationsWithUserSpecification : BaseSpecification<Donation, Guid>
+        {
+            public DonationsWithUserSpecification() : base()
+            {
+                AddInclude(d => d.User);
+            }
+        }
+
+        public class DonationsWithPaginationSpecification : BaseSpecification<Donation, Guid>
         {
             public DonationsWithPaginationSpecification(int pageNumber, int pageSize) : base()
             {

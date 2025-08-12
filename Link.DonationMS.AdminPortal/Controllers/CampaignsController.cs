@@ -137,13 +137,15 @@ namespace Link.DonationMS.AdminPortal.Controllers
                         dto.ImageExtension = Path.GetExtension(imageFile.FileName).TrimStart('.');
                     }
                     
+                    // Normalize decimal separator to dot before sending JSON
+                    dto.GoalAmount = decimal.Parse(dto.GoalAmount.ToString().Replace(',', '.'), System.Globalization.CultureInfo.InvariantCulture);
                     await _apiService.UpdateCampaignAsync(id, dto);
                     TempData["Success"] = "Campaign updated successfully.";
                     return RedirectToAction("Index", new { page = page });
                 }
-                catch
+                catch (Exception ex)
                 {
-                    TempData["Error"] = "Failed to update campaign. Please check your input and try again.";
+                    TempData["Error"] = $"Update failed: {ex.Message}";
                 }
             }
             
@@ -157,6 +159,11 @@ namespace Link.DonationMS.AdminPortal.Controllers
                 ViewBag.Categories = new SelectList(Enumerable.Empty<object>());
             }
             ViewBag.CurrentPage = page;
+            if (!ModelState.IsValid)
+            {
+                var modelErrors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                TempData["Error"] = modelErrors;
+            }
             return View(dto);
         }
 

@@ -1,20 +1,41 @@
 
-using Link.DonationMS.Api;
-using Microsoft.EntityFrameworkCore;
-using Persistence.Data;
+using Application.Services;
 using Application.Services.Abstractions;
-using Services;
-using Persistence;
+using Application.Services.Resources;
 using Domain.Contracts;
-using Microsoft.OpenApi.Models;
+using Link.DonationMS.Api;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Persistence;
+using Persistence.Data;
+using Services;
+using System.Globalization;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+
+
+
+
+// Add localization services
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+// Configure supported cultures
+var supportedCultures = new[] { "en", "ar" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(supportedCultures[1]) // Arabic as default
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -22,14 +43,19 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Link.DonationMS API", Version = "v1" });
 });
 
+// CORS configuration with specific allowed origins
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
+    ?? new[] { "https://localhost:4200" };
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngular", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowCredentials()
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials()
+              .WithExposedHeaders("Content-Disposition");
     });
 });
 
@@ -86,12 +112,14 @@ if (string.IsNullOrEmpty(jwtAudience))
     throw new InvalidOperationException("jwtOptions:Audience is not configured");
 }
 
+
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -103,13 +131,37 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
+}).AddGoogle(googleOptions =>
+{
+    googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+    googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    googleOptions.SaveTokens = true;
+}).AddFacebook(facebookOptions =>
+{
+    facebookOptions.AppId = builder.Configuration["Authentication:Facebook:AppId"];
+    facebookOptions.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+    facebookOptions.SaveTokens = true;
+
+    facebookOptions.Scope.Add("email");
+
 });
+
+
 
 builder.Services.AddAuthorization();
 
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
+builder.Services.AddScoped<IPaymentGatewayService, StripeGatewayService>();
+builder.Services.AddScoped<ICampaignService, CampaignService>();
+builder.Services.AddScoped<IReceiptService, ReceiptService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
+
+
+builder.Services.AddScoped<IStripeWebhookService, StripeWebhookService>();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -117,15 +169,31 @@ builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfiles>());
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
+
+// Apply localization middleware
+
+// Ensure Accept-Language header has highest priority
+localizationOptions.RequestCultureProviders.Insert(0, new AcceptLanguageHeaderRequestCultureProvider());
+
+app.UseRequestLocalization(localizationOptions);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAngular");
+// Use previously configured Cookie Policy settings
+app.UseCookiePolicy();
 
-app.UseHttpsRedirection();
+app.UseCors("AllowAll");
+
+// Disable HTTPS redirection in development to avoid OAuth issues
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -175,6 +243,7 @@ static async Task SeedDataAsync(DonationDbContext context, IServiceProvider serv
             UserName = adminEmail,
             Email = adminEmail,
             DisplayName = "System Administrator",
+            DisplayNameAr = "مدير النظام",
             EmailConfirmed = true
         };
 
@@ -185,5 +254,68 @@ static async Task SeedDataAsync(DonationDbContext context, IServiceProvider serv
         }
     }
 
-
+    // Seed NotificationTypes
+    //await SeedNotificationTypesAsync(context);
 }
+
+//static async Task SeedNotificationTypesAsync(DonationDbContext context)
+//{
+//    if (!context.NotificationTypes.Any())
+//    {
+//        var notificationTypes = new[]
+//        {
+//            // DonationReceipt notifications
+//            new Domain.Models.NotificationType
+//            {
+//                TypeId = Domain.Models.NotificationTypeId.DonationReceipt,
+//                Subject = "شكراً لتبرعك يا {{DonorName}}",
+//                Body = "تم استلام تبرعك بمبلغ {{Amount}} لحملة {{CampaignName}}. رقم الإيصال: {{ReceiptNumber}}",
+//                LanguageId = Domain.Models.NotificationLanguage.Arabic
+//            },
+//            new Domain.Models.NotificationType
+//            {
+//                TypeId = Domain.Models.NotificationTypeId.DonationReceipt,
+//                Subject = "Thank you for your donation {{DonorName}}",
+//                Body = "We have received your donation of {{Amount}} to {{CampaignName}}. Receipt No: {{ReceiptNumber}}",
+//                LanguageId = Domain.Models.NotificationLanguage.English
+//            },
+            
+//            // CampaignGoalReached notifications
+//            new Domain.Models.NotificationType
+//            {
+//                TypeId = Domain.Models.NotificationTypeId.CampaignGoalReached,
+//                Subject = "تم تحقيق هدف حملة {{CampaignName}}",
+//                Body = "نود إبلاغك بأنه تم تحقيق هدف حملة {{CampaignName}}. شكراً لدعمكم الكريم",
+//                LanguageId = Domain.Models.NotificationLanguage.Arabic
+//            },
+//            new Domain.Models.NotificationType
+//            {
+//                TypeId = Domain.Models.NotificationTypeId.CampaignGoalReached,
+//                Subject = "Campaign {{CampaignName}} Goal Reached",
+//                Body = "We are pleased to inform you that the campaign {{CampaignName}} has reached its funding goal. Thank you for your support!",
+//                LanguageId = Domain.Models.NotificationLanguage.English
+//            },
+            
+//            // Register notifications
+//            new Domain.Models.NotificationType
+//            {
+//                TypeId = Domain.Models.NotificationTypeId.Register,
+//                Subject = "مرحباً بك في منصة التبرعات",
+//                Body = "مرحباً {{UserName}},\n\nشكراً لتسجيلك في منصة التبرعات. يمكنك الآن تسجيل الدخول والبدء في دعم الحملات المفضلة لديك.",
+//                LanguageId = Domain.Models.NotificationLanguage.Arabic
+//            },
+//            new Domain.Models.NotificationType
+//            {
+//                TypeId = Domain.Models.NotificationTypeId.Register,
+//                Subject = "Welcome to Donation Platform",
+//                Body = "Hello {{UserName}},\n\nThank you for registering with our donation platform. You can now log in and start supporting your favorite campaigns.",
+//                LanguageId = Domain.Models.NotificationLanguage.English
+//            }
+//        };
+
+//        context.NotificationTypes.AddRange(notificationTypes);
+//        await context.SaveChangesAsync();
+//    }
+//}
+
+

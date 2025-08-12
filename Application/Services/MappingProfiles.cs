@@ -1,12 +1,13 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Domain.Models;
 using DTOs.CampaignDTOs;
 using DTOs.CategoryDTOs;
 using DTOs.DonationDTOs;
-using DTOs.EmailNotificationDTOs;
+using DTOs.NotificationDTOs;
 using DTOs.ReceiptDTOs;
 using DTOs.UserDTOs;
 using DTOs.PaymentDTOs;
+using Services.Resources;
 using Stripe;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,8 @@ namespace Services
 
 
             CreateMap<CreateCampaignDto, Campaign>();
-            CreateMap<UpdateCampaignDto, Campaign>();
+            CreateMap<UpdateCampaignDto, Campaign>()
+                .ForMember(dest => dest.StartDate, opt => opt.Ignore());
 
             CreateMap<Category, CategoryDto>();
             CreateMap<CreateCategoryDto, Category>();
@@ -39,14 +41,18 @@ namespace Services
 
             CreateMap<Donation, DonationResultDto>()
                 .ForMember(dest => dest.CampaignTitle, opt => opt.MapFrom(src => src.Campaign.TitleEn))
-                .ForMember(dest => dest.DonorName, opt => opt.MapFrom(src => src.User != null ? src.User.DisplayName : "Anonymous"))
+                .ForMember(dest => dest.DonorName, opt => opt.MapFrom(src => src.User != null ? src.User.DisplayName : PdfLabels.Anonymous))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
             CreateMap<CreateDonationDto, Donation>();
             CreateMap<UpdateDonationStatusDto, Donation>();
 
-            CreateMap<EmailNotification, EmailNotificationDto>();
-            CreateMap<CreateEmailNotificationDto, EmailNotification>();
+            CreateMap<Notification, NotificationDto>()
+                .ForMember(dest => dest.TypeId, opt => opt.MapFrom(src => src.NotificationTypeId))
+                .ForMember(dest => dest.LanguageId, opt => opt.MapFrom(src => (int)src.LanguageId));
+            CreateMap<CreateNotificationDto, Notification>()
+                .ForMember(dest => dest.NotificationTypeId, opt => opt.MapFrom(src => src.TypeId))
+                .ForMember(dest => dest.LanguageId, opt => opt.MapFrom(src => (NotificationLanguage)src.LanguageId));
 
             CreateMap<Receipt, ReceiptDto>();
             CreateMap<CreateReceiptDto, Receipt>();

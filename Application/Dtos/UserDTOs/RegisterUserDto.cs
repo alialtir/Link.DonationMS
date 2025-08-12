@@ -12,6 +12,9 @@ namespace DTOs.UserDTOs
         [Required]
         public string DisplayName { get; set; }
 
+        [Required]
+        public string DisplayNameAr { get; set; }
+
         [Required, EmailAddress]
         public string Email { get; set; }
 

@@ -1,9 +1,14 @@
+using Application.Services;
 using Application.Services.Abstractions;
 using AutoMapper;
 using Domain.Contracts;
-using Microsoft.AspNetCore.Identity;
 using Domain.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Persistence.Data;
+
 
 namespace Services
 {
@@ -13,18 +18,24 @@ namespace Services
             IUnitOfWork unitOfWork,
             IMapper mapper,
             UserManager<User> userManager,
-            IConfiguration configuration
+            IConfiguration configuration,
+            ILogger<StripeGatewayService> logger,
+            IHttpContextAccessor httpContextAccessor,
+            INotificationService notificationService,
+            DonationDbContext context
         )
         {
-            CampaignService = new CampaignService(unitOfWork, mapper);
-            DonationService = new DonationService(unitOfWork, mapper);
+            CampaignService = new CampaignService(unitOfWork, mapper, notificationService);
+            // create payment gateway
+            PaymentGatewayService = new StripeGatewayService(configuration, logger);
+            DonationService = new DonationService(unitOfWork, mapper, PaymentGatewayService, httpContextAccessor);
             CategoryService = new CategoryService(unitOfWork, mapper);
-            UserService = new UserService(unitOfWork, mapper, userManager);
-            DashboardService = new DashboardService();
-            EmailNotificationService = new EmailNotificationService();
-            ReceiptService = new ReceiptService();
-            PaymentService = new PaymentService(configuration,unitOfWork,mapper);
+            UserService = new UserService(unitOfWork, mapper, userManager, notificationService);
+            NotificationService = new NotificationService(unitOfWork, mapper);
+            ReceiptService = new ReceiptService(unitOfWork, mapper);
+            DashboardService = new DashboardService(unitOfWork, mapper);
             AuthenticationService = new AuthenticationService(userManager, configuration);
+         
         }
 
         public ICampaignService CampaignService { get; }
@@ -32,9 +43,11 @@ namespace Services
         public ICategoryService CategoryService { get; }
         public IUserService UserService { get; }
         public IDashboardService DashboardService { get; }
-        public IEmailNotificationService EmailNotificationService { get; }
+        public INotificationService NotificationService { get; }
         public IReceiptService ReceiptService { get; }
-        public IPaymentService PaymentService { get; }
+        public IPaymentGatewayService PaymentGatewayService { get; }
         public IAuthenticationService AuthenticationService { get; }
+        public IEmailGatewayService EmailGatewayService { get; }
+ 
     }
 } 

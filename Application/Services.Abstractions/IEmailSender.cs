@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Models
+namespace Services.Abstractions
 {
-    public enum EmailNotificationType
+    public interface IEmailSender
     {
-        DonationReceipt,
-        CampaignGoalReached
+        Task SendEmailAsync(string to, string subject, string body);
     }
-
 }

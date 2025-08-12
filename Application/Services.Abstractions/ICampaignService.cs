@@ -1,9 +1,12 @@
 using DTOs.CampaignDTOs;
+using DTOs.DonationDTOs;
 
 namespace Application.Services.Abstractions
 {
     public interface ICampaignService
     {
+
+
         Task<CampaignResultDto> GetByIdAsync(int id);
         Task<IEnumerable<CampaignResultDto>> GetAllAsync(int pageNumber = 1, int pageSize = 6);
         Task<int> GetCountAsync();
@@ -15,5 +18,6 @@ namespace Application.Services.Abstractions
         Task<bool> DeleteAsync(int id);
         Task<decimal> GetCampaignProgressAsync(int id);
         Task<IEnumerable<CampaignResultDto>> GetActiveCampaignsFilteredAsync(string title = null, int? categoryId = null, int pageNumber = 1, int pageSize = 5);
+        Task UpdateCampaignProgressAsync(DTOs.DonationDTOs.DonationProgressDto donationProgress);
     }
-} 
+}

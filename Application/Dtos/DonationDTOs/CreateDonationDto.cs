@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,6 +16,6 @@ namespace DTOs.DonationDTOs
         [Required]
         public int CampaignId { get; set; }
 
-        public Guid? UserId { get; set; }
+    
     }
 }

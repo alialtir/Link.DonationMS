@@ -4,7 +4,7 @@ namespace DTOs.DashboardDTOs
 {
     public class DonorHistoryDto
     {
-        public int DonationId { get; set; }
+        public Guid DonationId { get; set; }
         public decimal Amount { get; set; }
         public DateTime DonationDate { get; set; }
         public string CampaignTitle { get; set; }

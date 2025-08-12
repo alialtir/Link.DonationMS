@@ -1,0 +1,229 @@
+@model Link.DonationMS.AdminPortal.Models.ViewModels.DashboardViewModel
+@using Shared.Resources
+@{
+    ViewData["Title"] = SharedResource.GetString("Dashboard");
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            @SharedResource.GetString("Dashboard")
+        </h1>
+        <small class="text-muted">آخر تحديث: @DateTime.Now.ToString("yyyy/MM/dd HH:mm")</small>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                @SharedResource.GetString("TotalDonations")
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.Overview.TotalDonations.ToString("N0") @SharedResource.GetString("CurrencySymbol")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                @SharedResource.GetString("TotalDonors")
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.Overview.TotalDonors
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                @SharedResource.GetString("ActiveCampaigns")
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.TopCampaigns.Count
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-bullhorn fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row">
+        <!-- Bar Chart -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        @SharedResource.GetString("CollectedAmountsTopCampaigns")
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="barChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pie Chart -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        @SharedResource.GetString("ProgressRatios")
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="pieChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campaigns Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-table me-2"></i>
+                @SharedResource.GetString("TopCampaignsDetails")
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th>@SharedResource.GetString("CampaignName")</th>
+                            <th class="text-center">@SharedResource.GetString("Goal")</th>
+                            <th class="text-center">@SharedResource.GetString("CollectedAmount")</th>
+                            <th class="text-center">@SharedResource.GetString("ProgressPercentage")</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.TopCampaigns.Count; i++)
+                        {
+                            var c = Model.TopCampaigns[i];
+                            var progressColor = c.ProgressPercentage >= 100 ? "success" : c.ProgressPercentage >= 75 ? "info" : c.ProgressPercentage >= 50 ? "warning" : "danger";
+                            <tr>
+                                <td class="text-center font-weight-bold">@(i + 1)</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="mr-3">
+                                            <div class="icon-circle bg-primary">
+                                                <i class="fas fa-bullhorn text-white"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="small text-gray-500">@string.Format(SharedResource.GetString("CampaignNumber"), c.Id)</div>
+                                            <div class="font-weight-bold">
+                                                @(System.Threading.Thread.CurrentThread.CurrentUICulture.Name.StartsWith("ar") ? c.TitleAr : c.TitleEn)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center font-weight-bold">@c.GoalAmount.ToString("N0") @SharedResource.GetString("CurrencySymbol")</td>
+                                <td class="text-center font-weight-bold text-success">@c.CurrentAmount.ToString("N0") @SharedResource.GetString("CurrencySymbol")</td>
+                                <td class="text-center">
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-@progressColor" role="progressbar" 
+                                             style="width: @Math.Min(c.ProgressPercentage, 100)%" 
+                                             aria-valuenow="@c.ProgressPercentage" 
+                                             aria-valuemin="0" aria-valuemax="100">
+                                            @c.ProgressPercentage.ToString("F1")%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const campaigns = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopCampaigns.Select(c => c.TitleAr)));
+        const currentAmounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopCampaigns.Select(c => c.CurrentAmount)));
+        const progressPercentages = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopCampaigns.Select(c => c.ProgressPercentage)));
+
+        const barCtx = document.getElementById('barChart');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: campaigns,
+                datasets: [{
+                    label: @Html.Raw("'" + SharedResource.GetString("CurrentAmountLabel") + "'"),
+                    data: currentAmounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false }
+                },
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const pieCtx = document.getElementById('pieChart');
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: campaigns,
+                datasets: [{
+                    label: '@SharedResource.GetString("ProgressPercentage")',
+                    data: progressPercentages,
+                    backgroundColor: [
+                        '#007bff','#28a745','#ffc107','#dc3545','#17a2b8'
+                    ]
+                }]
+            }
+        });
+    </script>
+}
+

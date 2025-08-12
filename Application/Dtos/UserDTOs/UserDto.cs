@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -13,6 +13,9 @@ namespace DTOs.UserDTOs
         
         [Required]
         public string DisplayName { get; set; }
+
+        [Required]
+        public string DisplayNameAr { get; set; }
         
         [Required]
         [EmailAddress]

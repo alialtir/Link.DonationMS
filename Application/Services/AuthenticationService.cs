@@ -14,7 +14,6 @@ namespace Services
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
-
         public AuthenticationService(UserManager<User> userManager, IConfiguration configuration)
         {
             _userManager = userManager;
@@ -23,7 +22,7 @@ namespace Services
 
         public async Task<AuthenticationResult> LoginAsync(LoginDto loginDto)
         {
-            var user = await _userManager.FindByNameAsync(loginDto.UserName);
+            var user = await _userManager.FindByNameAsync(loginDto.UserName) ?? await _userManager.FindByEmailAsync(loginDto.UserName);
             if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
                 return new AuthenticationResult { Succeeded = false, Error = "Invalid credentials" };
 
@@ -59,13 +58,55 @@ namespace Services
             };
         }
 
+        public async Task<User> FindOrCreateExternalUserAsync(string email, string displayNameEn, string displayNameAr = null)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                user = new User
+                {
+                    UserName = email,
+                    Email = email,
+                    DisplayName = displayNameEn,
+                    DisplayNameAr = displayNameAr ?? displayNameEn,
+                    EmailConfirmed = true
+                };
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    throw new Exception("Failed to create external user.");
+                }
+
+                await _userManager.AddToRoleAsync(user, "Donor");
+            }
+            else
+            {
+    
+                if (!string.IsNullOrEmpty(displayNameAr) && user.DisplayNameAr != displayNameAr)
+                {
+                    user.DisplayNameAr = displayNameAr;
+                    await _userManager.UpdateAsync(user);
+                }
+            }
+            return user;
+        }
+
+
+
+        public async Task<string> GenerateJwtToken(User user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            return await GenerateJwtTokenAsync(user, roles);
+        }
+
         private async Task<string> GenerateJwtTokenAsync(User user, IList<string> roles)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.DisplayName ?? ""),
-                new Claim(ClaimTypes.Email, user.Email ?? "")
+                new Claim("name_en", user.DisplayName ?? string.Empty),
+                new Claim("name_ar", user.DisplayNameAr ?? string.Empty),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty)
             };
             foreach (var role in roles)
                 claims.Add(new Claim(ClaimTypes.Role, role));

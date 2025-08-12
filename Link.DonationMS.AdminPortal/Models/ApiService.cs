@@ -8,6 +8,7 @@ using System.Net.Http.Json;
 using System.Text;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
+using DTOs.DashboardDTOs;
 
 namespace Link.DonationMS.AdminPortal.Models
 {
@@ -199,7 +200,11 @@ namespace Link.DonationMS.AdminPortal.Models
             AddAuthHeader();
             var endpoint = string.Format(_configuration["ApiEndpoints:Campaigns:Update"], id);
             var response = await _httpClient.PutAsJsonAsync(endpoint, dto);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new InvalidOperationException($"API Error {(int)response.StatusCode}: {errorContent}");
+            }
         }
 
         public async Task DeleteCampaignAsync(int id)
@@ -259,6 +264,24 @@ namespace Link.DonationMS.AdminPortal.Models
             var endpoint = string.Format(_configuration["ApiEndpoints:Categories:Delete"], id);
             var response = await _httpClient.DeleteAsync(endpoint);
             return response.IsSuccessStatusCode;
+        }
+
+        public async Task<IEnumerable<CampaignProgressDto>> GetTopCampaignsAsync()
+        {
+            AddAuthHeader();
+            var endpoint = _configuration["ApiEndpoints:Dashboard:TopCampaigns"];
+            var response = await _httpClient.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<IEnumerable<CampaignProgressDto>>();
+        }
+
+        public async Task<DashboardStatsDto> GetDashboardOverviewAsync()
+        {
+            AddAuthHeader();
+            var endpoint = _configuration["ApiEndpoints:Dashboard:Overview"];
+            var response = await _httpClient.GetAsync(endpoint);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<DashboardStatsDto>();
         }
 
         public async Task<int> GetCategoriesCountAsync()

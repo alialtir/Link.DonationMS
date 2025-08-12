@@ -27,9 +27,22 @@ else
             <span asp-validation-for="DisplayName" class="text-danger"></span>
         </div>
         <div class="mb-3">
+            <label asp-for="DisplayNameAr" class="form-label">@SharedResource.GetString("NameAr")</label>
+            <input asp-for="DisplayNameAr" class="form-control" />
+            <span asp-validation-for="DisplayNameAr" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
             <label asp-for="Email" class="form-label">@SharedResource.GetString("Email")</label>
             <input asp-for="Email" class="form-control" />
             <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Role" class="form-label">@SharedResource.GetString("Role")</label>
+            <select asp-for="Role" class="form-select">
+                <option value="Admin">@SharedResource.GetString("Admin")</option>
+                <option value="CampaignManager">@SharedResource.GetString("CampaignManager")</option>
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
         </div>
         
         @if (!ViewData.ModelState.IsValid)

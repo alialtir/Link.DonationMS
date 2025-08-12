@@ -40,6 +40,7 @@ namespace Link.DonationMS.Api.Controllers
             return Ok(count);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {

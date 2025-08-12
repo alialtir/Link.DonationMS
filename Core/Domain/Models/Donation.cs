@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Models
 {
-    public class Donation : BaseEntity<int>
+    public class Donation : BaseEntity<Guid>
     {
         [Required]
         [Precision(18, 2)]
@@ -18,10 +19,8 @@ namespace Domain.Models
         public DonationStatus Status { get; set; } = DonationStatus.Pending;
 
         [MaxLength(300)]
-        public string? ClientSecret { get; set; }
 
-        [MaxLength(300)]
-        public string? PaymentIntentId { get; set; }
+        public string? PaymentId { get; set; }
 
         public int CampaignId { get; set; }
         public Campaign Campaign { get; set; }
@@ -29,7 +28,5 @@ namespace Domain.Models
         public User User { get; set; }
 
         public Receipt Receipt { get; set; } 
-
-        public List<EmailNotification> Notifications { get; set; } = new List<EmailNotification>();
     }
 }

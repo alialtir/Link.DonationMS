@@ -118,11 +118,9 @@ namespace Persistence.Data.Migrations
 
             modelBuilder.Entity("Domain.Models.Donation", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
@@ -131,17 +129,13 @@ namespace Persistence.Data.Migrations
                     b.Property<int>("CampaignId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ClientSecret")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
                     b.Property<DateTime>("DonationDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsAnonymous")
                         .HasColumnType("bit");
 
-                    b.Property<string>("PaymentIntentId")
+                    b.Property<string>("PaymentId")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
@@ -160,7 +154,54 @@ namespace Persistence.Data.Migrations
                     b.ToTable("Donations");
                 });
 
-            modelBuilder.Entity("Domain.Models.EmailNotification", b =>
+            modelBuilder.Entity("Domain.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BCC")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CC")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsSent")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LanguageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NotificationTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("To")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NotificationTypeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("Domain.Models.NotificationType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -172,40 +213,70 @@ namespace Persistence.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DonationId")
+                    b.Property<int>("LanguageId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsSent")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("RecipientEmail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("SentAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("Type")
+                    b.Property<int>("TypeId")
                         .HasColumnType("int");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DonationId");
+                    b.ToTable("NotificationTypes");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("EmailNotifications");
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Body = "تم استلام تبرعك بمبلغ {{Amount}} لحملة {{CampaignName}}. رقم الإيصال: {{ReceiptNumber}}",
+                            LanguageId = 1,
+                            Subject = "شكراً لتبرعك يا {{DonorName}}",
+                            TypeId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Body = "We have received your donation of {{Amount}} to {{CampaignName}}. Receipt No: {{ReceiptNumber}}",
+                            LanguageId = 2,
+                            Subject = "Thank you for your donation {{DonorName}}",
+                            TypeId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Body = "مرحباً {{UserName}},\n\nشكراً لتسجيلك في منصة التبرعات. يمكنك الآن تسجيل الدخول والبدء في دعم الحملات المفضلة لديك.",
+                            LanguageId = 1,
+                            Subject = "مرحباً بك في منصة التبرعات",
+                            TypeId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Body = "Hello {{UserName}},\n\nThank you for registering with our donation platform. You can now log in and start supporting your favorite campaigns.",
+                            LanguageId = 2,
+                            Subject = "Welcome to Donation Platform",
+                            TypeId = 3
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Body = "نود إبلاغك بأنه تم تحقيق هدف حملة {{CampaignName}}. شكراً لدعمكم الكريم",
+                            LanguageId = 1,
+                            Subject = "تم تحقيق هدف حملة {{CampaignName}}",
+                            TypeId = 2
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Body = "We are pleased to inform you that the campaign {{CampaignName}} has reached its funding goal. Thank you for your support!",
+                            LanguageId = 2,
+                            Subject = "Campaign {{CampaignName}} Goal Reached",
+                            TypeId = 2
+                        });
                 });
 
             modelBuilder.Entity("Domain.Models.Receipt", b =>
@@ -219,8 +290,12 @@ namespace Persistence.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DonationId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("DonationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ReceiptNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -244,6 +319,10 @@ namespace Persistence.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayNameAr")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -673,19 +752,20 @@ namespace Persistence.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Models.EmailNotification", b =>
+            modelBuilder.Entity("Domain.Models.Notification", b =>
                 {
-                    b.HasOne("Domain.Models.Donation", "Donation")
+                    b.HasOne("Domain.Models.NotificationType", "NotificationType")
                         .WithMany("Notifications")
-                        .HasForeignKey("DonationId")
+                        .HasForeignKey("NotificationTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Donation");
+                    b.Navigation("NotificationType");
 
                     b.Navigation("User");
                 });
@@ -788,10 +868,13 @@ namespace Persistence.Data.Migrations
 
             modelBuilder.Entity("Domain.Models.Donation", b =>
                 {
-                    b.Navigation("Notifications");
-
                     b.Navigation("Receipt")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.NotificationType", b =>
+                {
+                    b.Navigation("Notifications");
                 });
 
             modelBuilder.Entity("Domain.Models.User", b =>

@@ -66,6 +66,7 @@ namespace Link.DonationMS.Api.Controllers
                 var registerDto = new RegisterUserDto
                 {
                     DisplayName = dto.DisplayName,
+                    DisplayNameAr = dto.DisplayName, // Using the same name for both languages for now
                     Email = dto.Email,
                     Password = dto.Password,
                     ConfirmPassword = dto.Password 

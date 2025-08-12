@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Domain.Models;
 using Persistence.Data;
-using AuthServer.Services;
+//using AuthServer.Services;
 using Application.Services.Abstractions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -96,7 +96,7 @@ namespace AuthServer
 
             builder.Services.AddAuthorization();
 
-            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            //builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             var app = builder.Build();
 

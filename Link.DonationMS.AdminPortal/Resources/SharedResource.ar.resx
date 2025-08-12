@@ -256,4 +256,13 @@
   <data name="Date" xml:space="preserve">
     <value>التاريخ</value>
   </data>
+  <data name="Pending" xml:space="preserve">
+    <value>قيد الانتظار</value>
+  </data>
+  <data name="Successful" xml:space="preserve">
+    <value>ناجح</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>فاشل</value>
+  </data>
 </root> 
