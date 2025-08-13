@@ -1,5 +1,6 @@
 using Link.DonationMS.AdminPortal.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 
@@ -18,6 +19,22 @@ namespace Link.DonationMS.AdminPortal
                 {
                     options.LoginPath = "/Auth/Login";
                     options.LogoutPath = "/Auth/Logout";
+                    options.Cookie.SameSite = SameSiteMode.None;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                })
+                .AddGoogle("Google", options =>
+                {
+                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+                    options.CallbackPath = "/Auth/GoogleCallback";
+                    options.SaveTokens = true;
+
+                    // correlation cookie fix for HTTP localhost
+                    options.CorrelationCookie.SameSite = SameSiteMode.None;
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.CorrelationCookie.HttpOnly = true;
+
+                    options.Events.OnRemoteFailure = context => { return Task.CompletedTask; };
                 });
             builder.Services.AddHttpContextAccessor();
 

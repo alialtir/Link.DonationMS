@@ -300,5 +300,15 @@ namespace Link.DonationMS.AdminPortal.Models
             var response = await _httpClient.PostAsync(endpoint, new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json"));
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<AuthenticationResult> GoogleLoginAsync(string idToken)
+        {
+            var endpoint = _configuration["ApiEndpoints:Auth:GoogleLogin"];
+            var payload = JsonConvert.SerializeObject(idToken);
+            var response = await _httpClient.PostAsync(endpoint, new StringContent(payload, Encoding.UTF8, "application/json"));
+            if (!response.IsSuccessStatusCode)
+                return null;
+            return await response.Content.ReadFromJsonAsync<AuthenticationResult>();
+        }
     }
-} 
+}

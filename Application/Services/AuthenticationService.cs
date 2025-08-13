@@ -40,23 +40,6 @@ namespace Services
             };
         }
 
-        public async Task<UserProfileResult> GetUserProfileAsync(string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return null;
-            var roles = await _userManager.GetRolesAsync(user);
-            var names = (user.DisplayName ?? "").Split(' ', 2);
-            return new UserProfileResult
-            {
-                UserId = user.Id.ToString(),
-                Email = user.Email,
-                UserName = user.UserName,
-                DisplayName = user.DisplayName,
-                Roles = roles.ToList(),
-                Succeeded = true,
-                Error = null
-            };
-        }
 
         public async Task<User> FindOrCreateExternalUserAsync(string email, string displayNameEn, string displayNameAr = null)
         {

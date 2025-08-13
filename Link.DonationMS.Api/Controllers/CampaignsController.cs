@@ -16,7 +16,7 @@ namespace Link.DonationMS.Api.Controllers
             _serviceManager = serviceManager;
         }
 
-        [AllowAnonymous]
+
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 6)
         {
@@ -40,7 +40,6 @@ namespace Link.DonationMS.Api.Controllers
             return Ok(count);
         }
 
-        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {

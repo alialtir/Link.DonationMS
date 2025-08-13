@@ -46,17 +46,7 @@ namespace Link.DonationMS.Api.Controllers
         }
 
        
-        [HttpGet("profile")]
-        public async Task<IActionResult> Profile()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-            var profile = await _serviceManager.AuthenticationService.GetUserProfileAsync(userId);
-            if (profile == null)
-                return NotFound();
-            return Ok(profile);
-        }
+
 
 
         [HttpPost("google-login")]
@@ -91,8 +81,10 @@ namespace Link.DonationMS.Api.Controllers
                 // Validate Facebook access token by calling Facebook Graph API
                 using var httpClient = new HttpClient();
                 
-                // Get user info with email field directly
-                var response = await httpClient.GetAsync($"https://graph.facebook.com/me?access_token={accessToken}&fields=id,name,email");
+                // Get user info with email field directly using URL from appsettings
+                var graphApiUrl = _configuration["Authentication:Facebook:GraphApiUrl"];
+                var finalUrl = graphApiUrl.Replace("{accessToken}", accessToken);
+                var response = await httpClient.GetAsync(finalUrl);
                 
                 if (!response.IsSuccessStatusCode)
                 {

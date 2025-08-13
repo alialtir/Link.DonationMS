@@ -13,6 +13,7 @@ using Link.DonationMS.AdminPortal.Models;
 
 namespace Link.DonationMS.AdminPortal.Controllers
 {
+    [Route("[controller]")]
     public class AuthController : Controller
     {
         private readonly ApiService _apiService;
@@ -21,7 +22,7 @@ namespace Link.DonationMS.AdminPortal.Controllers
             _apiService = apiService;
         }
 
-        [HttpGet]
+        [HttpGet("Login")]
         public async Task<IActionResult> Login()
         {
             if (User.Identity != null && User.Identity.IsAuthenticated)
@@ -38,7 +39,7 @@ namespace Link.DonationMS.AdminPortal.Controllers
             return View();
         }
 
-        [HttpPost]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDto model)
         {
             try
@@ -83,7 +84,7 @@ namespace Link.DonationMS.AdminPortal.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("Logout")]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -116,5 +117,60 @@ namespace Link.DonationMS.AdminPortal.Controllers
             ViewBag.Email = email;
             return View();
         }
+
+        [HttpGet("login-google")]
+        public IActionResult LoginGoogle(string returnUrl = "")
+        {
+            var redirectUrl = Url.Action("GoogleCallback", "Auth", new { returnUrl });
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(properties, "Google");
+        }
+
+        [HttpGet("GoogleCallback")]
+        public async Task<IActionResult> GoogleCallback(string returnUrl = "")
+        {
+            var authResult = await HttpContext.AuthenticateAsync("Google");
+            if (!authResult.Succeeded || authResult.Principal == null)
+            {
+                TempData["Error"] = "Google authentication failed";
+                return RedirectToAction("Login");
+            }
+
+            var idToken = authResult.Properties?.GetTokenValue("id_token");
+            if (string.IsNullOrEmpty(idToken))
+            {
+                TempData["Error"] = "Failed to retrieve Google token.";
+                return RedirectToAction("Login");
+            }
+
+            var apiResult = await _apiService.GoogleLoginAsync(idToken);
+            if (apiResult == null || !apiResult.Succeeded)
+            {
+                TempData["Error"] = apiResult?.Error ?? "Login failed";
+                return RedirectToAction("Login");
+            }
+            if (apiResult.Roles == null || !apiResult.Roles.Contains("Admin"))
+            {
+                TempData["Error"] = "You are not authorized to access this area";
+                return RedirectToAction("Login");
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, apiResult.UserId ?? string.Empty),
+                new Claim(ClaimTypes.Name, apiResult.UserName ?? string.Empty)
+            };
+            if (apiResult.Roles != null)
+                claims.AddRange(apiResult.Roles.Select(r => new Claim(ClaimTypes.Role, r)));
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+            Response.Cookies.Append("AccessToken", apiResult.AccessToken ?? string.Empty);
+
+            if (!string.IsNullOrEmpty(returnUrl))
+                return Redirect(returnUrl);
+            return RedirectToAction("Index", "Home");
+        }
+
     }
 } 
