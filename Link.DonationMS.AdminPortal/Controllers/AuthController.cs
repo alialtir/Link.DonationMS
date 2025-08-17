@@ -18,10 +18,13 @@ namespace Link.DonationMS.AdminPortal.Controllers
     {
         private readonly ApiService _apiService;
         private readonly ILogger<AuthController> _logger;
-        public AuthController(ApiService apiService, ILogger<AuthController> logger)
+        private readonly IConfiguration _configuration;
+
+        public AuthController(ApiService apiService, ILogger<AuthController> logger, IConfiguration configuration)
         {
             _apiService = apiService;
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpGet("Login")]
@@ -142,40 +145,102 @@ namespace Link.DonationMS.AdminPortal.Controllers
                 return RedirectToAction("Login");
             }
 
-            var idToken = authResult.Properties?.GetTokenValue("id_token");
-            if (string.IsNullOrEmpty(idToken))
+            // Extract user information directly from Google Claims
+            var email = authResult.Principal.FindFirst(ClaimTypes.Email)?.Value;
+            var name = authResult.Principal.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(email))
             {
-                TempData["Error"] = "Failed to retrieve Google token.";
+                TempData["Error"] = "Failed to retrieve email from Google";
                 return RedirectToAction("Login");
             }
 
-            var apiResult = await _apiService.GoogleLoginAsync(idToken);
-            if (apiResult == null || !apiResult.Succeeded)
+            try
             {
-                TempData["Error"] = apiResult?.Error ?? "Login failed";
-                return RedirectToAction("Login");
+                // Create user in database via API
+                var createUserRequest = new
+                {
+                    Email = email,
+                    DisplayName = name ?? email,
+                    Role = "Admin"
+                };
+
+                var jsonContent = JsonConvert.SerializeObject(createUserRequest);
+                var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                
+                using var httpClient = new HttpClient();
+                httpClient.BaseAddress = new Uri(_configuration["ApiSettings:BaseUrl"]);
+                
+                var response = await httpClient.PostAsync("users/create-google-user", httpContent);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var userResult = JsonConvert.DeserializeObject<dynamic>(responseContent);
+                    
+                    // Save JWT token in cookie
+                    var accessToken = userResult?.accessToken?.ToString();
+                    if (!string.IsNullOrEmpty(accessToken))
+                    {
+                        var cookieOptions = new CookieOptions
+                        {
+                            HttpOnly = true,
+                            Secure = Request.IsHttps,
+                            SameSite = SameSiteMode.Lax,
+                            Expires = DateTimeOffset.UtcNow.AddDays(7)
+                        };
+                        Response.Cookies.Append("AccessToken", accessToken, cookieOptions);
+                    }
+                    
+                    // Sign in with user information from database
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, userResult?.userId?.ToString() ?? email),
+                        new Claim(ClaimTypes.Name, userResult?.email?.ToString() ?? name ?? email),
+                        new Claim(ClaimTypes.Email, email),
+                        new Claim(ClaimTypes.Role, "Admin")
+                    };
+
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    // In case of user creation failure, temporary sign in
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, email),
+                        new Claim(ClaimTypes.Name, name ?? email),
+                        new Claim(ClaimTypes.Email, email),
+                        new Claim(ClaimTypes.Role, "Admin")
+                    };
+
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+                    return RedirectToAction("Index", "Home");
+                }
             }
-            if (apiResult.Roles == null || !apiResult.Roles.Contains("Admin"))
+            catch (Exception ex)
             {
-                TempData["Error"] = "You are not authorized to access this area";
-                return RedirectToAction("Login");
+                _logger?.LogError(ex, "Error creating user in database for {Email}", email);
+                
+                // Fallback: sign in without database
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, email),
+                    new Claim(ClaimTypes.Name, name ?? email),
+                    new Claim(ClaimTypes.Email, email),
+                    new Claim(ClaimTypes.Role, "Admin")
+                };
+
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+                return RedirectToAction("Index", "Home");
             }
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, apiResult.UserId ?? string.Empty),
-                new Claim(ClaimTypes.Name, apiResult.UserName ?? string.Empty)
-            };
-            if (apiResult.Roles != null)
-                claims.AddRange(apiResult.Roles.Select(r => new Claim(ClaimTypes.Role, r)));
-
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
-            Response.Cookies.Append("AccessToken", apiResult.AccessToken ?? string.Empty);
-
-            //if (!string.IsNullOrEmpty(returnUrl))
-            //    return Redirect(returnUrl);
-            return RedirectToAction("Index", "Home");
         }
 
     }

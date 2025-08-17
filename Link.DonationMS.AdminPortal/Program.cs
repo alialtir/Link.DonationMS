@@ -27,15 +27,11 @@ namespace Link.DonationMS.AdminPortal
                 {
                     options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
                     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-                    //options.CallbackPath = "/Auth/GoogleCallback";
                     options.SaveTokens = true;
-
-                    //// correlation cookie fix for HTTP localhost
-                    //options.CorrelationCookie.SameSite = SameSiteMode.None;
-                    //options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-                    //options.CorrelationCookie.HttpOnly = true;
-
-                    options.Events.OnRemoteFailure = context => { return Task.CompletedTask; };
+                    
+                    options.Scope.Add("openid");
+                    options.Scope.Add("profile");
+                    options.Scope.Add("email");
                 });
             builder.Services.AddHttpContextAccessor();
 
