@@ -136,80 +136,50 @@ namespace Link.DonationMS.Api.Controllers
         {
             try
             {
-                // Check if user already exists
                 var existingUsers = await _serviceManager.UserService.GetAllAsync();
                 var existingUser = existingUsers.FirstOrDefault(u => u.Email == createUserDto.Email);
                 
-                if (existingUser != null)
+                if (existingUser == null)
                 {
-                    // User exists, ensure they have Admin role
-                    var userRoles = await _serviceManager.UserService.GetUserRolesAsync(existingUser.Id);
-                    if (!userRoles.Contains("Admin"))
+                    var registerDto = new RegisterUserDto
                     {
-                        await _serviceManager.UserService.AddToRoleAsync(existingUser.Id, "Admin");
-                    }
-
-                    var allUsersForJwt = await _serviceManager.UserService.GetAllAsync();
-                    var userEntity = allUsersForJwt.FirstOrDefault(u => u.Id == existingUser.Id);
-                
-                    // Create a mock User entity for JWT generation since we can't access the real one
-                    var mockUser = new Domain.Models.User 
-                    { 
-                        Id = existingUser.Id, 
-                        Email = existingUser.Email,
-                        UserName = existingUser.Email,
-                        DisplayName = existingUser.DisplayName ?? existingUser.Email
+                        DisplayName = createUserDto.DisplayName,
+                        DisplayNameAr = createUserDto.DisplayName,
+                        Email = createUserDto.Email,
+                        Password = "TempPassword123!",
+                        ConfirmPassword = "TempPassword123!"
                     };
-                
-                    var jwt = await _serviceManager.AuthenticationService.GenerateJwtToken(mockUser);
 
-                    return Ok(new 
-                    { 
-                        userId = existingUser.Id,
-                        email = existingUser.Email,
-                        accessToken = jwt,
-                        message = "User already exists, Admin role ensured."
-                    });
+                    existingUser = await _serviceManager.UserService.RegisterAsync(registerDto);
+                    await _serviceManager.UserService.RemoveFromRoleAsync(existingUser.Id, "Donor");
                 }
 
-                // Create new user
-                var registerDto = new RegisterUserDto
+                var userRoles = await _serviceManager.UserService.GetUserRolesAsync(existingUser.Id);
+                if (!userRoles.Contains("Admin"))
                 {
-                    DisplayName = createUserDto.DisplayName,
-                    DisplayNameAr = createUserDto.DisplayName,
-                    Email = createUserDto.Email,
-                    Password = "TempPassword123!", // Temporary password for Google users
-                    ConfirmPassword = "TempPassword123!"
-                };
+                    await _serviceManager.UserService.AddToRoleAsync(existingUser.Id, "Admin");
+                }
 
-                var user = await _serviceManager.UserService.RegisterAsync(registerDto);
-
-                // Remove default Donor role and add Admin role
-                await _serviceManager.UserService.RemoveFromRoleAsync(user.Id, "Donor");
-                await _serviceManager.UserService.AddToRoleAsync(user.Id, "Admin");
-
-                // Generate JWT token for new user
-                var newUserMock = new Domain.Models.User 
+                var mockUser = new Domain.Models.User 
                 { 
-                    Id = user.Id, 
-                    Email = user.Email,
-                    UserName = user.Email,
-                    DisplayName = user.DisplayName ?? user.Email
+                    Id = existingUser.Id, 
+                    Email = existingUser.Email,
+                    UserName = existingUser.Email,
+                    DisplayName = existingUser.DisplayName ?? existingUser.Email
                 };
                 
-                var newUserJwt = await _serviceManager.AuthenticationService.GenerateJwtToken(newUserMock);
+                var jwt = await _serviceManager.AuthenticationService.GenerateJwtToken(mockUser);
 
                 return Ok(new 
                 { 
-                    userId = user.Id,
-                    email = user.Email,
-                    accessToken = newUserJwt,
-                    message = "User created successfully with Admin role."
+                    userId = existingUser.Id,
+                    email = existingUser.Email,
+                    accessToken = jwt
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while creating user.", error = ex.Message });
+                return StatusCode(500, new { error = ex.Message });
             }
         }
     }

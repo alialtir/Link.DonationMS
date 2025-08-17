@@ -145,7 +145,6 @@ namespace Link.DonationMS.AdminPortal.Controllers
                 return RedirectToAction("Login");
             }
 
-            // Extract user information directly from Google Claims
             var email = authResult.Principal.FindFirst(ClaimTypes.Email)?.Value;
             var name = authResult.Principal.FindFirst(ClaimTypes.Name)?.Value;
 
@@ -157,14 +156,7 @@ namespace Link.DonationMS.AdminPortal.Controllers
 
             try
             {
-                // Create user in database via API
-                var createUserRequest = new
-                {
-                    Email = email,
-                    DisplayName = name ?? email,
-                    Role = "Admin"
-                };
-
+                var createUserRequest = new { Email = email, DisplayName = name ?? email };
                 var jsonContent = JsonConvert.SerializeObject(createUserRequest);
                 var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
                 
@@ -178,69 +170,36 @@ namespace Link.DonationMS.AdminPortal.Controllers
                     var responseContent = await response.Content.ReadAsStringAsync();
                     var userResult = JsonConvert.DeserializeObject<dynamic>(responseContent);
                     
-                    // Save JWT token in cookie
                     var accessToken = userResult?.accessToken?.ToString();
                     if (!string.IsNullOrEmpty(accessToken))
                     {
-                        var cookieOptions = new CookieOptions
+                        Response.Cookies.Append("AccessToken", accessToken, new CookieOptions
                         {
                             HttpOnly = true,
                             Secure = Request.IsHttps,
                             SameSite = SameSiteMode.Lax,
                             Expires = DateTimeOffset.UtcNow.AddDays(7)
-                        };
-                        Response.Cookies.Append("AccessToken", accessToken, cookieOptions);
+                        });
                     }
-                    
-                    // Sign in with user information from database
-                    var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, userResult?.userId?.ToString() ?? email),
-                        new Claim(ClaimTypes.Name, userResult?.email?.ToString() ?? name ?? email),
-                        new Claim(ClaimTypes.Email, email),
-                        new Claim(ClaimTypes.Role, "Admin")
-                    };
-
-                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
-
-                    return RedirectToAction("Index", "Home");
-                }
-                else
-                {
-                    // In case of user creation failure, temporary sign in
-                    var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, email),
-                        new Claim(ClaimTypes.Name, name ?? email),
-                        new Claim(ClaimTypes.Email, email),
-                        new Claim(ClaimTypes.Role, "Admin")
-                    };
-
-                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
-
-                    return RedirectToAction("Index", "Home");
                 }
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error creating user in database for {Email}", email);
-                
-                // Fallback: sign in without database
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, email),
-                    new Claim(ClaimTypes.Name, name ?? email),
-                    new Claim(ClaimTypes.Email, email),
-                    new Claim(ClaimTypes.Role, "Admin")
-                };
-
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
-
-                return RedirectToAction("Index", "Home");
             }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, email),
+                new Claim(ClaimTypes.Name, name ?? email),
+                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Role, "Admin")
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+            return RedirectToAction("Index", "Home");
         }
 
     }
