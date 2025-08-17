@@ -19,7 +19,7 @@ namespace Link.DonationMS.AdminPortal
                 {
                     options.LoginPath = "/Auth/Login";
                     options.LogoutPath = "/Auth/Logout";
-                    options.AccessDeniedPath = "/Auth/Login"; // إعادة التوجيه لصفحة تسجيل الدخول عند رفض الوصول
+                    options.AccessDeniedPath = "/Auth/Login"; 
                     //options.Cookie.SameSite = SameSiteMode.None;
                     //options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 })
