@@ -19,9 +19,9 @@ namespace Link.DonationMS.Api.Controllers
        
         [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int page = 1)
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
         {
-            var result = await _serviceManager.CategoryService.GetAllAsync(page);
+            var result = await _serviceManager.CategoryService.GetAllAsync(page, pageSize);
             return Ok(result);
         }
 

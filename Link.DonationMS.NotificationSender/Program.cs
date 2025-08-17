@@ -1,4 +1,4 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Domain.Models;
 using MailKit.Net.Smtp;
 using Microsoft.EntityFrameworkCore;
@@ -44,11 +44,6 @@ namespace Link.DonationMS.NotificationSender
                 })
                 .Build();
 
-            //using var scope = host.Services.CreateScope();
-            //var senderService = scope.ServiceProvider.GetRequiredService<INotificationSenderService>();
-
-           
-            //await senderService.ProcessPendingNotificationsAsync();
 
             await host.RunAsync();
         }

@@ -5,6 +5,7 @@ using Services.Specifications;
 using Domain.Contracts;
 using Domain.Models;
 using DTOs.DashboardDTOs;
+using Microsoft.Extensions.Configuration;
 
 namespace Services
 {
@@ -12,18 +13,21 @@ namespace Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public DashboardService(IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly IConfiguration _configuration;
+        public DashboardService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
 
-        public async Task<IEnumerable<CampaignProgressDto>> GetTopCampaignsAsync()
+        public async Task<IEnumerable<CampaignProgressDto>> GetTopCampaignsAsync(int? count = null)
         {
-            // Get top 5 campaigns ordered by the amount collected so far (CurrentAmount)
-            const int TOP_COUNT = 5;
-            var spec = new CampaignSpecifications.TopCampaignsSpecification(TOP_COUNT);
+            // Get count from parameter, or from appsettings.json, or default to 5
+            int topCount = count ?? _configuration.GetValue<int>("Dashboard:TopCampaignsCount", 5);
+            
+            var spec = new CampaignSpecifications.TopCampaignsSpecification(topCount);
             var campaigns = await _unitOfWork.Campaigns.ListAsync(spec);
 
             // Project to DTO

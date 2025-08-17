@@ -9,6 +9,7 @@ using static Services.Specifications.CampaignSpecifications;
 using System.Linq;
 using static Services.Specifications.DonationSpecifications;
 using System;
+using Microsoft.Extensions.Configuration;
 
 namespace Services
 {
@@ -17,12 +18,14 @@ namespace Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
+        private readonly IConfiguration _configuration;
 
-        public CampaignService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService)
+        public CampaignService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _notificationService = notificationService;
+            _configuration = configuration;
         }
 
         public async Task<CampaignResultDto> CreateAsync(CreateCampaignDto createCampaignDto)
@@ -46,15 +49,6 @@ namespace Services
                 var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
                 campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
                 var dto = _mapper.Map<CampaignResultDto>(campaign);
-                if (campaign.Category != null)
-                {
-                    dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr)
-                        ? campaign.Category.TitleAr
-                        : campaign.Category.TitleEn;
-                    dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn)
-                        ? campaign.Category.TitleEn
-                        : campaign.Category.TitleAr;
-                }
                 result.Add(dto);
             }
             return result;
@@ -75,15 +69,6 @@ namespace Services
             var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
             campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
             var dto = _mapper.Map<CampaignResultDto>(campaign);
-            if (campaign.Category != null)
-            {
-                dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr)
-                    ? campaign.Category.TitleAr
-                    : campaign.Category.TitleEn;
-                dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn)
-                    ? campaign.Category.TitleEn
-                    : campaign.Category.TitleAr;
-            }
             return dto;
         }
 
@@ -110,15 +95,6 @@ namespace Services
 
             var dto = _mapper.Map<CampaignResultDto>(updatedCampaign);
 
-            if (updatedCampaign.Category != null)
-            {
-                dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(updatedCampaign.Category.TitleAr)
-                    ? updatedCampaign.Category.TitleAr
-                    : updatedCampaign.Category.TitleEn;
-                dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(updatedCampaign.Category.TitleEn)
-                    ? updatedCampaign.Category.TitleEn
-                    : updatedCampaign.Category.TitleAr;
-            }
             return dto;
         }
 
@@ -157,15 +133,6 @@ namespace Services
                 var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
                 campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
                 var dto = _mapper.Map<CampaignResultDto>(campaign);
-                if (campaign.Category != null)
-                {
-                    dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr)
-                        ? campaign.Category.TitleAr
-                        : campaign.Category.TitleEn;
-                    dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn)
-                        ? campaign.Category.TitleEn
-                        : campaign.Category.TitleAr;
-                }
                 result.Add(dto);
             }
             return result;
@@ -182,15 +149,6 @@ namespace Services
                 var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
                 campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
                 var dto = _mapper.Map<CampaignResultDto>(campaign);
-                if (campaign.Category != null)
-                {
-                    dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr)
-                        ? campaign.Category.TitleAr
-                        : campaign.Category.TitleEn;
-                    dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn)
-                        ? campaign.Category.TitleEn
-                        : campaign.Category.TitleAr;
-                }
                 result.Add(dto);
             }
             return result;
@@ -207,15 +165,6 @@ namespace Services
                 var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
                 campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
                 var dto = _mapper.Map<CampaignResultDto>(campaign);
-                if (campaign.Category != null)
-                {
-                    dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr)
-                        ? campaign.Category.TitleAr
-                        : campaign.Category.TitleEn;
-                    dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn)
-                        ? campaign.Category.TitleEn
-                        : campaign.Category.TitleAr;
-                }
                 result.Add(dto);
             }
             return result;
@@ -232,11 +181,7 @@ namespace Services
                 var successfulDonations = await _unitOfWork.Donations.ListAsync(successfulDonationsSpec);
                 campaign.CurrentAmount = successfulDonations.Sum(d => d.Amount);
                 var dto = _mapper.Map<CampaignResultDto>(campaign);
-                if (campaign.Category != null)
-                {
-                    dto.CategoryTitleAr = !string.IsNullOrWhiteSpace(campaign.Category.TitleAr) ? campaign.Category.TitleAr : campaign.Category.TitleEn;
-                    dto.CategoryTitleEn = !string.IsNullOrWhiteSpace(campaign.Category.TitleEn) ? campaign.Category.TitleEn : campaign.Category.TitleAr;
-                }
+
                 result.Add(dto);
             }
             return result;
@@ -261,7 +206,7 @@ namespace Services
                 {
 await _notificationService.CreateNotificationAsync(
                         NotificationTypeId.CampaignGoalReached,
-                        "admin@linkdonation.com", // Admin email - يمكن ضبطه
+                        _configuration["AdminSettings:AdminEmail"], // Read from configuration
                         new
                         {
                             CampaignName = !string.IsNullOrWhiteSpace(campaign.TitleAr) ? campaign.TitleAr : campaign.TitleEn

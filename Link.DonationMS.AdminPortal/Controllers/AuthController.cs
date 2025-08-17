@@ -17,9 +17,11 @@ namespace Link.DonationMS.AdminPortal.Controllers
     public class AuthController : Controller
     {
         private readonly ApiService _apiService;
-        public AuthController(ApiService apiService)
+        private readonly ILogger<AuthController> _logger;
+        public AuthController(ApiService apiService, ILogger<AuthController> logger)
         {
             _apiService = apiService;
+            _logger = logger;
         }
 
         [HttpGet("Login")]
@@ -27,11 +29,11 @@ namespace Link.DonationMS.AdminPortal.Controllers
         {
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                if (!User.IsInRole("Admin"))
+                if (!User.IsInRole("Admin") && !User.IsInRole("CampaignManager"))
                 {
                     await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     Response.Cookies.Delete("AccessToken");
-                    ModelState.AddModelError("", "Access denied. Only Administrators can access Admin Portal.");
+                    ModelState.AddModelError("", "Access denied. Only Administrators and Campaign Managers can access Admin Portal.");
                     return View();
                 }
                 return RedirectToAction("Index", "Home");
@@ -50,9 +52,13 @@ namespace Link.DonationMS.AdminPortal.Controllers
                     ModelState.AddModelError("", result?.Error ?? "Login failed");
                     return View(model);
                 }
-                if (result.Roles == null || !result.Roles.Contains("Admin"))
+                // Debug: Log the roles to see what we're getting
+                var rolesDebug = result.Roles != null ? string.Join(", ", result.Roles) : "No roles";
+                _logger?.LogInformation($"User {model.UserName} has roles: {rolesDebug}");
+                
+                if (result.Roles == null || (!result.Roles.Contains("Admin") && !result.Roles.Contains("CampaignManager")))
                 {
-                    ModelState.AddModelError("", "You are not authorized to access this area");
+                    ModelState.AddModelError("", $"You are not authorized to access this area. Only Administrators and Campaign Managers are allowed. Your roles: {rolesDebug}");
                     return View(model);
                 }
                 if (result.RequiresPasswordReset)
@@ -127,7 +133,7 @@ namespace Link.DonationMS.AdminPortal.Controllers
         }
 
         [HttpGet("GoogleCallback")]
-        public async Task<IActionResult> GoogleCallback(string returnUrl = "")
+        public async Task<IActionResult> GoogleCallback()
         {
             var authResult = await HttpContext.AuthenticateAsync("Google");
             if (!authResult.Succeeded || authResult.Principal == null)
@@ -167,8 +173,8 @@ namespace Link.DonationMS.AdminPortal.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
             Response.Cookies.Append("AccessToken", apiResult.AccessToken ?? string.Empty);
 
-            if (!string.IsNullOrEmpty(returnUrl))
-                return Redirect(returnUrl);
+            //if (!string.IsNullOrEmpty(returnUrl))
+            //    return Redirect(returnUrl);
             return RedirectToAction("Index", "Home");
         }
 

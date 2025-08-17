@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -8,12 +8,12 @@ using Services.Abstractions;
 
 public class NotificationWorker : BackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly INotificationSenderService _notificationSenderService;
     private readonly ILogger<NotificationWorker> _logger;
 
-    public NotificationWorker(IServiceProvider serviceProvider, ILogger<NotificationWorker> logger)
+    public NotificationWorker(INotificationSenderService notificationSenderService, ILogger<NotificationWorker> logger)
     {
-        _serviceProvider = serviceProvider;
+        _notificationSenderService = notificationSenderService;
         _logger = logger;
     }
         
@@ -25,12 +25,9 @@ public class NotificationWorker : BackgroundService
         {
             try
             {
-                using var scope = _serviceProvider.CreateScope();
-                var senderService = scope.ServiceProvider.GetRequiredService<INotificationSenderService>();
-
                 _logger.LogInformation("Starting to process pending notifications at: {time}", DateTimeOffset.Now);
 
-                await senderService.ProcessPendingNotificationsAsync();
+                await _notificationSenderService.ProcessPendingNotificationsAsync();
 
                 _logger.LogInformation("Finished processing notifications at: {time}", DateTimeOffset.Now);
             }

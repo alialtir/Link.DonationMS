@@ -10,6 +10,8 @@ namespace Application.Services.Abstractions
         INotificationService NotificationService { get; }
         IReceiptService ReceiptService { get; }
         IPaymentGatewayService PaymentGatewayService { get; }
+        IPdfGatewayService PdfGatewayService { get; }
+        IPdfService PdfService { get; }
         IAuthenticationService AuthenticationService { get; }
     }
 } 

@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Link.DonationMS.AdminPortal.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ReportsController : Controller
     {
         private readonly IConfiguration _configuration;

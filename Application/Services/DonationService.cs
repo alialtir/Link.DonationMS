@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using static Services.Specifications.DonationSpecifications;
 using Services.Resources;
+using Microsoft.Extensions.Configuration;
 
 namespace Services
 {
@@ -19,18 +20,21 @@ namespace Services
         private readonly IMapper _mapper;
         private readonly IPaymentGatewayService _paymentGateway;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly INotificationService _notificationService;
+        private readonly IConfiguration _configuration;
 
-        public DonationService(IUnitOfWork unitOfWork, IMapper mapper, IPaymentGatewayService paymentGateway, IHttpContextAccessor httpContextAccessor)
+        public DonationService(IUnitOfWork unitOfWork, IMapper mapper, IPaymentGatewayService paymentGateway, IHttpContextAccessor httpContextAccessor, INotificationService notificationService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _paymentGateway = paymentGateway;
             _httpContextAccessor = httpContextAccessor;
+            _notificationService = notificationService;
+            _configuration = configuration;
         }
 
         public async Task<DonationPaymentResultDto> CreateAsync(CreateDonationDto createDonationDto)
         {
-         
             var userIdClaim = _httpContextAccessor.HttpContext?.User
                 .FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -39,8 +43,6 @@ namespace Services
             {
                 userId = Guid.Parse(userIdClaim);
             }
-
-
 
             // 1- build donation object fully in memory (no DB save yet)
             var donation = _mapper.Map<Donation>(createDonationDto);
@@ -52,36 +54,30 @@ namespace Services
             // 2- generate payment object (needs donation.Id & amount)
             var paymentObj = await _paymentGateway.GeneratePaymentObjectAsync(donation.Id, donation.Amount);
 
-            // 3- attach payment info before first (and only) save
-            donation.PaymentId = paymentObj.PaymentId;
+            // 3- check payment status first before saving anything
             if (paymentObj.Status == PaymentObjectStatus.Failed)
             {
-                donation.Status = DonationStatus.Failed;
+                // Send error notification to admin
+                await SendPaymentFailureNotificationToAdmin(donation, paymentObj);
+                
+                // Return error to user without saving to DB
+                throw new InvalidOperationException("Failed to create payment link. Please try again later.");
             }
 
-            // 4- save donation once
+            // 4- only save to DB if payment object was created successfully
+            donation.PaymentId = paymentObj.PaymentId;
+            donation.Status = DonationStatus.Pending; // Keep as pending until webhook confirms
+
             await _unitOfWork.Donations.AddAsync(donation);
             await _unitOfWork.CompleteAsync();
 
-            // 4- return unified response
+            // 5- return successful response
             return new DonationPaymentResultDto
             {
-                //DonationId = donation.Id,
-                //Amount = donation.Amount,
                 PaymentUrl = paymentObj.PaymentUrl,
                 PaymentId = paymentObj.PaymentId,
                 Status = paymentObj.Status.ToString()
             };
-        }
-
-        public async Task<bool> DeleteAsync(Guid id)
-        {
-            var spec = new DonationWithDetailsSpecification(id);
-            var donation = await _unitOfWork.Donations.GetEntityWithSpecAsync(spec);
-            if (donation == null) return false;
-            _unitOfWork.Donations.Delete(donation);
-            await _unitOfWork.CompleteAsync();
-            return true;
         }
 
 
@@ -94,18 +90,6 @@ namespace Services
             foreach (var donation in donations)
             {
                 var dto = _mapper.Map<DonationResultDto>(donation);
-                if (donation.Campaign != null)
-                {
-                    dto.CampaignTitle = !string.IsNullOrWhiteSpace(donation.Campaign.TitleAr)
-                        ? donation.Campaign.TitleAr
-                        : donation.Campaign.TitleEn;
-                }
-                if (donation.User != null)
-                {
-                    dto.DonorName = !string.IsNullOrWhiteSpace(donation.User.DisplayName)
-                        ? donation.User.DisplayName
-                        : donation.User.UserName;
-                }
                 result.Add(dto);
             }
             return result;
@@ -117,61 +101,57 @@ namespace Services
             var donation = await _unitOfWork.Donations.GetEntityWithSpecAsync(spec);
             if (donation == null) return null;
             var result = _mapper.Map<DonationResultDto>(donation);
-            if (donation.Campaign != null)
-            {
-                result.CampaignTitle = !string.IsNullOrWhiteSpace(donation.Campaign.TitleAr)
-                    ? donation.Campaign.TitleAr
-                    : donation.Campaign.TitleEn;
-            }
-            if (donation.User != null)
-            {
-                result.DonorName = !string.IsNullOrWhiteSpace(donation.User.DisplayName)
-                    ? donation.User.DisplayName
-                    : donation.User.UserName;
-            }
+     
             return result;
         }
 
         public async Task<IEnumerable<RecentDonorDto>> GetRecentDonorsAsync(int count = 5, int? campaignId = null)
         {
+   
+            var baseQuery = _unitOfWork.Donations.GetQueryable()
+                .Where(d => d.Status == DonationStatus.Successful);
 
-
-            ISpecifications<Donation, Guid> spec = campaignId.HasValue
-                ? new RecentRandomDonationsWithUserSpecification(campaignId.Value, count)
-                : new RecentRandomDonationsWithUserSpecification(count);
-
-            var donationsWithUsers = await _unitOfWork.Donations.ListAsync(spec);
-
-            var result = new List<RecentDonorDto>();
-
-            foreach (var donation in donationsWithUsers)
+    
+            if (campaignId.HasValue)
             {
-                string donorName;
-                bool isAnonymous = donation.IsAnonymous || donation.User == null;
-                if (isAnonymous)
-                {
-                    donorName = PdfLabels.Anonymous;
-                    result.Add(new RecentDonorDto { Name = donorName, Amount = donation.Amount });
-                }
-                else
-                {
-                    donorName = !string.IsNullOrWhiteSpace(donation.User.DisplayName)
-                        ? donation.User.DisplayName
-                        : donation.User.UserName;
-                    var existing = result.FirstOrDefault(r => r.Name == donorName);
-                    if (existing != null)
-                    {
-                        existing.Amount += donation.Amount;
-                    }
-                    else
-                    {
-                        result.Add(new RecentDonorDto { Name = donorName, Amount = donation.Amount });
-                    }
-                }
-                if (result.Count >= count)
-                    break;
+                baseQuery = baseQuery.Where(d => d.CampaignId == campaignId.Value);
             }
-            return result;
+
+            var query = baseQuery.Include(d => d.User);
+
+      
+            var topDonors = await query
+                .GroupBy(d => new { 
+                    UserId = d.User != null ? d.User.Id : (Guid?)null,
+                    DisplayName = d.User != null ? d.User.DisplayName : null,
+                    UserName = d.User != null ? d.User.UserName : null,
+                    IsAnonymous = d.IsAnonymous
+                })
+                .Select(g => new
+                {
+                    UserId = g.Key.UserId,
+                    Name = g.Key.IsAnonymous ?
+                           "Anonymous Donor" :
+                           (!string.IsNullOrWhiteSpace(g.Key.DisplayName) ? g.Key.DisplayName : g.Key.UserName),
+                    TotalAmount = g.Sum(x => x.Amount),
+                    IsAnonymous = g.Key.IsAnonymous
+                })
+                .OrderByDescending(d => d.TotalAmount)
+                .Take(20) 
+                .ToListAsync();
+
+            
+            var randomDonors = topDonors
+                .OrderBy(_ => Guid.NewGuid())
+                .Take(count)
+                .Select(d => new RecentDonorDto
+                {
+                    Name = d.Name,
+                    Amount = d.TotalAmount
+                })
+                .ToList();
+
+            return randomDonors;
         }
 
         public async Task<IEnumerable<DonationResultDto>> GetDonationsByCampaignAsync(int campaignId)
@@ -182,18 +162,7 @@ namespace Services
             foreach (var donation in donations)
             {
                 var dto = _mapper.Map<DonationResultDto>(donation);
-                if (donation.Campaign != null)
-                {
-                    dto.CampaignTitle = !string.IsNullOrWhiteSpace(donation.Campaign.TitleAr)
-                        ? donation.Campaign.TitleAr
-                        : donation.Campaign.TitleEn;
-                }
-                if (donation.User != null)
-                {
-                    dto.DonorName = !string.IsNullOrWhiteSpace(donation.User.DisplayName)
-                        ? donation.User.DisplayName
-                        : donation.User.UserName;
-                }
+          
                 result.Add(dto);
             }
             return result;
@@ -207,18 +176,7 @@ namespace Services
             foreach (var donation in donations)
             {
                 var dto = _mapper.Map<DonationResultDto>(donation);
-                if (donation.Campaign != null)
-                {
-                    dto.CampaignTitle = !string.IsNullOrWhiteSpace(donation.Campaign.TitleAr)
-                        ? donation.Campaign.TitleAr
-                        : donation.Campaign.TitleEn;
-                }
-                if (donation.User != null)
-                {
-                    dto.DonorName = !string.IsNullOrWhiteSpace(donation.User.DisplayName)
-                        ? donation.User.DisplayName
-                        : donation.User.UserName;
-                }
+           
                 result.Add(dto);
             }
             return result;
@@ -255,6 +213,43 @@ namespace Services
             }
             
             return false;
+        }
+
+        /// <summary>
+        /// Send notification to admin when payment link creation fails
+        /// </summary>
+        private async Task SendPaymentFailureNotificationToAdmin(Donation donation, PaymentObjectDto paymentObj)
+        {
+            try
+            {
+                // Setup notification data
+                var notificationData = new
+                {
+                    DonationId = donation.Id,
+                    Amount = donation.Amount,
+                    CampaignId = donation.CampaignId,
+                    UserId = donation.UserId,
+                    DonationDate = donation.DonationDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                    PaymentError = paymentObj.ErrorMessage ?? "Failed to create payment link",
+                    PaymentGateway = "Stripe"
+                };
+
+                // Send notification to admin (admin email should be configured in settings)
+                await _notificationService.CreateNotificationAsync(
+                    NotificationTypeId.PaymentFailure, // This type should be added to enum
+                    _configuration["AdminSettings:AdminEmail"] ?? "admin@linkdonation.com", // Read from configuration
+                    notificationData,
+                    NotificationLanguage.Arabic
+                );
+
+                await _unitOfWork.CompleteAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log error without breaking the main process
+                // Can add logging here
+                Console.WriteLine($"Failed to send payment failure notification: {ex.Message}");
+            }
         }
     }
 } 

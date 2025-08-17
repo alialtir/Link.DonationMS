@@ -222,11 +222,11 @@ namespace Link.DonationMS.AdminPortal.Models
             return admins.FirstOrDefault(a => a.Id == id);
         }
 
-        public async Task<IEnumerable<CategoryDto>> GetCategoriesAsync(int page = 1)
+        public async Task<IEnumerable<CategoryDto>> GetCategoriesAsync(int page = 1, int pageSize = 5)
         {
             AddAuthHeader();
             var endpoint = _configuration["ApiEndpoints:Categories:GetAll"];
-            var response = await _httpClient.GetAsync($"{endpoint}?page={page}");
+            var response = await _httpClient.GetAsync($"{endpoint}?page={page}&pageSize={pageSize}");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<IEnumerable<CategoryDto>>();
         }
@@ -266,13 +266,28 @@ namespace Link.DonationMS.AdminPortal.Models
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<IEnumerable<CampaignProgressDto>> GetTopCampaignsAsync()
+        public async Task<IEnumerable<CampaignProgressDto>> GetTopCampaignsAsync(int? count = null)
         {
             AddAuthHeader();
-            var endpoint = _configuration["ApiEndpoints:Dashboard:TopCampaigns"];
-            var response = await _httpClient.GetAsync(endpoint);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<IEnumerable<CampaignProgressDto>>();
+            try
+            {
+                var url = _configuration["ApiEndpoints:Dashboard:TopCampaigns"];
+                if (count.HasValue)
+                {
+                    url += $"?count={count.Value}";
+                }
+                
+                var response = await _httpClient.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<IEnumerable<CampaignProgressDto>>();
+                }
+                return new List<CampaignProgressDto>();
+            }
+            catch
+            {
+                return new List<CampaignProgressDto>();
+            }
         }
 
         public async Task<DashboardStatsDto> GetDashboardOverviewAsync()

@@ -1,4 +1,4 @@
-﻿using Domain.Contracts;
+using Domain.Contracts;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Data;
@@ -33,6 +33,8 @@ namespace Persistence.Repositories
         public void Update(T entity) => _context.Set<T>().Update(entity);
 
         public void Delete(T entity) => _context.Set<T>().Remove(entity);
+
+        public IQueryable<T> GetQueryable() => _context.Set<T>().AsQueryable();
 
         private IQueryable<T> ApplySpecification(ISpecifications<T, TKey> spec)
             => SpecificationEvaluator<T, TKey>.GetQuery(_context.Set<T>().AsQueryable(), spec);

@@ -19,20 +19,21 @@ namespace Link.DonationMS.AdminPortal
                 {
                     options.LoginPath = "/Auth/Login";
                     options.LogoutPath = "/Auth/Logout";
-                    options.Cookie.SameSite = SameSiteMode.None;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.AccessDeniedPath = "/Auth/Login"; // إعادة التوجيه لصفحة تسجيل الدخول عند رفض الوصول
+                    //options.Cookie.SameSite = SameSiteMode.None;
+                    //options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 })
                 .AddGoogle("Google", options =>
                 {
                     options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
                     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-                    options.CallbackPath = "/Auth/GoogleCallback";
+                    //options.CallbackPath = "/Auth/GoogleCallback";
                     options.SaveTokens = true;
 
-                    // correlation cookie fix for HTTP localhost
-                    options.CorrelationCookie.SameSite = SameSiteMode.None;
-                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-                    options.CorrelationCookie.HttpOnly = true;
+                    //// correlation cookie fix for HTTP localhost
+                    //options.CorrelationCookie.SameSite = SameSiteMode.None;
+                    //options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                    //options.CorrelationCookie.HttpOnly = true;
 
                     options.Events.OnRemoteFailure = context => { return Task.CompletedTask; };
                 });
@@ -101,14 +102,16 @@ namespace Link.DonationMS.AdminPortal
 
             app.Use(async (context, next) =>
             {
-                if (context.User.Identity?.IsAuthenticated == true)
-                {
-                    if (!context.User.IsInRole("Admin"))
-                    {
-                        context.Response.Redirect("/Auth/Login");
-                        return;
-                    }
-                }
+                //if (context.User.Identity?.IsAuthenticated == true)
+                //{
+                //    // Allow both Admin and CampaignManager roles
+                //    if (!context.User.IsInRole("Admin") && !context.User.IsInRole("CampaignManager"))
+                //    {
+                //        // User is authenticated but not authorized - redirect to unauthorized page
+                //        context.Response.Redirect("/Home/Unauthorized");
+                //        return;
+                //    }
+                //}
                 await next();
             });
 

@@ -8,19 +8,19 @@ namespace Link.DonationMS.Api.Controllers
     [ApiController]
     public class DashboardController : ControllerBase
     {
-        private readonly IDashboardService _dashboardService;
+        private readonly IServiceManager _serviceManager;
 
-        public DashboardController(IDashboardService dashboardService)
+        public DashboardController(IServiceManager serviceManager)
         {
-            _dashboardService = dashboardService;
+            _serviceManager = serviceManager;
         }
 
   
         [HttpGet("overview")]
         public async Task<ActionResult<DashboardStatsDto>> GetOverviewAsync()
         {
-            var totalDonations = await _dashboardService.GetTotalDonationsAsync();
-            var totalDonors = await _dashboardService.GetTotalDonorsAsync();
+            var totalDonations = await _serviceManager.DashboardService.GetTotalDonationsAsync();
+            var totalDonors = await _serviceManager.DashboardService.GetTotalDonorsAsync();
 
             var result = new DashboardStatsDto
             {
@@ -33,9 +33,9 @@ namespace Link.DonationMS.Api.Controllers
 
      
         [HttpGet("top-campaigns")]
-        public async Task<ActionResult<IEnumerable<CampaignProgressDto>>> GetTopCampaignsAsync()
+        public async Task<ActionResult<IEnumerable<CampaignProgressDto>>> GetTopCampaignsAsync([FromQuery] int? count = null)
         {
-            var campaigns = await _dashboardService.GetTopCampaignsAsync();
+            var campaigns = await _serviceManager.DashboardService.GetTopCampaignsAsync(count);
             return Ok(campaigns);
         }
     }

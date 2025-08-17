@@ -4,7 +4,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
-[Authorize]
+[Authorize(Roles = "Admin,CampaignManager")]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -18,26 +18,52 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        if (!User.IsInRole("Admin"))
+        if (!User.IsInRole("Admin") && !User.IsInRole("CampaignManager"))
         {
             return RedirectToAction("Login", "Auth");
         }
-        return RedirectToAction("Dashboard", "Home");
+        
+        // Campaign Managers go directly to Campaigns, Admins go to Dashboard
+        if (User.IsInRole("CampaignManager") && !User.IsInRole("Admin"))
+        {
+            return RedirectToAction("Index", "Campaigns");
+        }
+        
+        // Only Admins go to Dashboard
+        if (User.IsInRole("Admin"))
+        {
+            return RedirectToAction("Dashboard", "Home");
+        }
+        
+        // Fallback - should not reach here, but redirect to login if no valid role
+        return RedirectToAction("Login", "Auth");
     }
 
-    public async Task<IActionResult> Dashboard()
+    public async Task<IActionResult> Dashboard([FromQuery] int? count = null)
     {
+        // Dashboard is only for Admins
         if (!User.IsInRole("Admin"))
-            return RedirectToAction("Login", "Auth");
-
+        {
+            // If user is logged in but not authorized, show unauthorized page
+            if (User.Identity.IsAuthenticated)
+                return RedirectToAction("Unauthorized", "Home");
+            else
+                return RedirectToAction("Login", "Auth");
+        }
         var overview = await _apiService.GetDashboardOverviewAsync();
-        var topCampaigns = (await _apiService.GetTopCampaignsAsync()).ToList();
+        var topCampaigns = (await _apiService.GetTopCampaignsAsync(count)).ToList();
         var vm = new Link.DonationMS.AdminPortal.Models.ViewModels.DashboardViewModel
         {
             Overview = overview,
             TopCampaigns = topCampaigns
         };
         return View(vm);
+    }
+
+    [AllowAnonymous]
+    public IActionResult Unauthorized()
+    {
+        return View();
     }
 
     public IActionResult Privacy()

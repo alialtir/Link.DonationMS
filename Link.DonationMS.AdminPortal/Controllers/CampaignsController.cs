@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Link.DonationMS.AdminPortal.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,CampaignManager")]
     public class CampaignsController : Controller
     {
         private readonly ApiService _apiService;
@@ -20,7 +20,6 @@ namespace Link.DonationMS.AdminPortal.Controllers
             _configuration = configuration;
         }
 
-        [AllowAnonymous]
         public async Task<IActionResult> Index(int page = 1)
         {
             var campaigns = await _apiService.GetCampaignsAsync(page);

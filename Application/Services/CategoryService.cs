@@ -36,9 +36,9 @@ namespace Services
             return true;
         }
 
-        public async Task<IEnumerable<CategoryDto>> GetAllAsync(int pageNumber = 1)
+        public async Task<IEnumerable<CategoryDto>> GetAllAsync(int pageNumber = 1, int pageSize = 5)
         {
-            int pageSize = 5;
+            if (pageSize <= 0) pageSize = 5;
             var spec = new CategoriesWithPaginationSpecification(pageNumber, pageSize);
             var categories = await _unitOfWork.Categories.ListAsync(spec);
             return _mapper.Map<IEnumerable<CategoryDto>>(categories);

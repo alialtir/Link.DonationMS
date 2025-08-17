@@ -19,6 +19,11 @@ namespace Domain.Models
         /// <summary>
         /// Email sent after successful user registration.
         /// </summary>
-        Register = 3
+        Register = 3,
+
+        /// <summary>
+        /// Email sent to admin when payment gateway fails to create payment link.
+        /// </summary>
+        PaymentFailure = 4
     }
 }

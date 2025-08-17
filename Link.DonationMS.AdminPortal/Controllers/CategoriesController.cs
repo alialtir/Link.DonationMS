@@ -20,9 +20,9 @@ namespace Link.DonationMS.AdminPortal.Controllers
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            var categories = await _apiService.GetCategoriesAsync(page);
-            var totalCount = await _apiService.GetCategoriesCountAsync();
             var pageSize = _configuration.GetValue<int>("PageSize", 5);
+            var categories = await _apiService.GetCategoriesAsync(page, pageSize);
+            var totalCount = await _apiService.GetCategoriesCountAsync();
             
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);

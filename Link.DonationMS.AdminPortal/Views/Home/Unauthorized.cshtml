@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "Unauthorized Access";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Unauthorized Access
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-lock text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    <h5 class="card-title text-danger">Access Denied</h5>
+                    <p class="card-text">
+                        You are not authorized to view this page. Your current role does not have the required permissions to access this resource.
+                    </p>
+                    <p class="text-muted">
+                        If you believe this is an error, please contact your system administrator for assistance.
+                    </p>
+                    <div class="mt-4">
+                        @if (User.IsInRole("CampaignManager"))
+                        {
+                            <a href="@Url.Action("Index", "Campaigns")" class="btn btn-primary">
+                                <i class="fas fa-arrow-left"></i> Go to Campaigns
+                            </a>
+                        }
+                        else if (User.IsInRole("Admin"))
+                        {
+                            <a href="@Url.Action("Dashboard", "Home")" class="btn btn-primary">
+                                <i class="fas fa-arrow-left"></i> Go to Dashboard
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Login", "Auth")" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        }
+                        <a href="@Url.Action("Logout", "Auth")" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-header {
+        border-bottom: 2px solid #dc3545;
+    }
+    
+    .btn {
+        min-width: 120px;
+    }
+</style>

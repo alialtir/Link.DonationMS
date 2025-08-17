@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,6 +21,9 @@ namespace Domain.Contracts
         Task AddAsync(T entity);
         void Update(T entity);
         void Delete(T entity);
+        
+        // Method for getting queryable (for complex queries)
+        IQueryable<T> GetQueryable();
     }
 
 }

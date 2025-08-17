@@ -4,6 +4,7 @@ using Application.Services.Abstractions;
 using Application.Services.Resources;
 using Domain.Contracts;
 using Link.DonationMS.Api;
+using Link.DonationMS.Api.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -150,18 +151,9 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IServiceManager, ServiceManager>();
-builder.Services.AddScoped<IPaymentGatewayService, StripeGatewayService>();
-builder.Services.AddScoped<ICampaignService, CampaignService>();
-builder.Services.AddScoped<IReceiptService, ReceiptService>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddScoped<IDashboardService, DashboardService>();
-
-
-
-builder.Services.AddScoped<IStripeWebhookService, StripeWebhookService>();
+// Register all project services using extension method
+builder.Services.AddProjectServices();
 
 builder.Services.AddHttpContextAccessor();
 

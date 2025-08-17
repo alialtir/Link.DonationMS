@@ -107,6 +107,22 @@ namespace Persistence.Data
                     Subject = "Campaign {{CampaignName}} Goal Reached",
                     Body = "We are pleased to inform you that the campaign {{CampaignName}} has reached its funding goal. Thank you for your support!",
                     LanguageId = NotificationLanguage.English
+                },
+                new NotificationType
+                {
+                    Id = 7,
+                    TypeId = NotificationTypeId.PaymentFailure,
+                    Subject = "فشل في إنشاء رابط الدفع - تبرع رقم {{DonationId}}",
+                    Body = "تم فشل في إنشاء رابط الدفع للتبرع التالي:\n\nرقم التبرع: {{DonationId}}\nالمبلغ: {{Amount}} ريال\nرقم الحملة: {{CampaignId}}\nرقم المستخدم: {{UserId}}\nتاريخ التبرع: {{DonationDate}}\nسبب الفشل: {{PaymentError}}\nبوابة الدفع: {{PaymentGateway}}\n\nيرجى التحقق من إعدادات بوابة الدفع.",
+                    LanguageId = NotificationLanguage.Arabic
+                },
+                new NotificationType
+                {
+                    Id = 8,
+                    TypeId = NotificationTypeId.PaymentFailure,
+                    Subject = "Payment Link Creation Failed - Donation {{DonationId}}",
+                    Body = "Payment link creation failed for the following donation:\n\nDonation ID: {{DonationId}}\nAmount: {{Amount}} SAR\nCampaign ID: {{CampaignId}}\nUser ID: {{UserId}}\nDonation Date: {{DonationDate}}\nError: {{PaymentError}}\nPayment Gateway: {{PaymentGateway}}\n\nPlease check payment gateway settings.",
+                    LanguageId = NotificationLanguage.English
                 }
             );
 

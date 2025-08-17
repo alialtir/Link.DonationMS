@@ -13,7 +13,6 @@ namespace Application.Services.Abstractions
         Task<IEnumerable<RecentDonorDto>> GetRecentDonorsAsync(int count = 5, int? campaignId = null);
         Task<DonationPaymentResultDto> CreateAsync(CreateDonationDto createDonationDto);
         Task<bool> UpdateDonationStatusAsync(Guid id, UpdateDonationStatusDto updateStatusDto);
-        Task<bool> DeleteAsync(Guid id);
         Task<decimal> GetTotalDonationsByCampaignAsync(int campaignId);
         Task<bool> ProcessPaymentAsync(Guid donationId, string paymentIntentId);
      

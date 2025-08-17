@@ -119,6 +119,23 @@ namespace Services.Specifications
             }
         }
 
+        public class RandomDonorsSpecification : BaseSpecification<Donation, Guid>
+        {
+            public RandomDonorsSpecification(int count) : base(d => d.User != null && !d.IsAnonymous)
+            {
+                AddInclude(d => d.User);
+                AddOrderBy(d => Guid.NewGuid());
+                ApplyPagination(1, count * 10); // Get more to ensure we have enough unique donors
+            }
+
+            public RandomDonorsSpecification(int campaignId, int count) : base(d => d.CampaignId == campaignId && d.User != null && !d.IsAnonymous)
+            {
+                AddInclude(d => d.User);
+                AddOrderBy(d => Guid.NewGuid());
+                ApplyPagination(1, count * 10); // Get more to ensure we have enough unique donors
+            }
+        }
+
         public class DonationsWithUserSpecification : BaseSpecification<Donation, Guid>
         {
             public DonationsWithUserSpecification() : base()
@@ -134,6 +151,19 @@ namespace Services.Specifications
                 AddInclude(d => d.Campaign);
                 AddInclude(d => d.User);
                 ApplyPagination(pageNumber, pageSize);
+            }
+        }
+
+        public class RegisteredDonorsSpecification : BaseSpecification<Donation, Guid>
+        {
+            public RegisteredDonorsSpecification() : base(d => d.User != null && !d.IsAnonymous)
+            {
+                AddInclude(d => d.User);
+            }
+
+            public RegisteredDonorsSpecification(int campaignId) : base(d => d.User != null && !d.IsAnonymous && d.CampaignId == campaignId)
+            {
+                AddInclude(d => d.User);
             }
         }
     }
